@@ -26,3 +26,19 @@ def connect_to_database(func):
         return result
     return wrapper
 
+
+@connect_to_database
+def insert_node(connection, cursor, node):
+    """ Inserts a node into the database """
+    node_dict = {
+        'username': node.username,
+        'password_hash': node.password_hash,
+        'public_key': node.public_key,
+        'private_key': node.private_key
+    }
+    with connection:
+        cursor.execute(
+            """ INSERT INTO Node 
+                VALUES (:username, :password_hash, :public_key, :private_key)
+                """, node_dict)
+
