@@ -3,6 +3,7 @@
 
 # Imports
 import re
+from database import insert_node, get_node_by_username
 
 
 # Work variable(s)
@@ -10,6 +11,28 @@ minimum_amount_of_password_characters = 14
 
 
 # Functions
+def create_node():
+    """" Returns a node object based on user input """
+    from Classes.node import Node
+    # Get necessary user input
+    username = input(" Enter a username -> ")
+    password = input(" Enter a password -> ")
+
+    # Validate input
+    if not validate_username(username):
+        # Let user try to sign up once again
+        print("")
+        return create_node()
+
+    if not validate_password(password):
+        # Let user try to sign up once again
+        print("")
+        return create_node()
+
+    # Create and return node
+    return Node(username, password)
+
+
 def validate_username(username):
     """ Validates a username """
     # Empty check
