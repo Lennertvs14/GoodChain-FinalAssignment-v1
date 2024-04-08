@@ -1,5 +1,6 @@
 import os
 import platform
+from registration import registrate_user
 
 
 def clear_console():
@@ -34,7 +35,7 @@ try:
             print("Explore the blockchain")
         case 3:
             clear_console()
-            print("Sign up")
+            registrate_user()
         case _:
             exit()
 except ValueError:

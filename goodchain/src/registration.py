@@ -11,6 +11,13 @@ minimum_amount_of_password_characters = 14
 
 
 # Functions
+def registrate_user():
+    print("Sign up")
+    node = create_node()
+    insert_node(node)
+    # TODO: Give node a registration reward
+
+
 def create_node():
     """" Returns a node object based on user input """
     from Classes.node import Node
@@ -29,8 +36,18 @@ def create_node():
         print("")
         return create_node()
 
+    # Get hash value of password to store to avoid storing the actual password in our database
+    password_hash = get_password_hash_value(password)
+
     # Create and return node
-    return Node(username, password)
+    return Node(username, password_hash)
+
+
+def get_password_hash_value(password):
+    import hashlib
+    digest = hashlib.sha256()
+    digest.update(password.encode())
+    return digest.hexdigest()
 
 
 def validate_username(username):
