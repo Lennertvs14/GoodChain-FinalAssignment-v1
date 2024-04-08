@@ -1,0 +1,2 @@
+""" Registrate a new node """
+
