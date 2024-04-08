@@ -7,7 +7,7 @@ def connect_to_database(func):
     def wrapper(*args, **kwargs):
         # Open connection
         database = '../data/database.db'
-        connection = sqlite3.connect(':memory:')
+        connection = sqlite3.connect(database)
         # Ensure Node table exists
         cursor = connection.cursor()
         cursor.execute(
