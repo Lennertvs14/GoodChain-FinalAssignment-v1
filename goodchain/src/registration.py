@@ -12,7 +12,6 @@ minimum_amount_of_password_characters = 14
 
 # Functions
 def registrate_user():
-    print("Sign up")
     node = create_node()
     insert_node(node)
     # TODO: Give node a registration reward

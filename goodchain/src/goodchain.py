@@ -1,6 +1,7 @@
 import os
 import platform
 from registration import registrate_user
+from login import login
 
 
 def clear_console():
@@ -29,12 +30,14 @@ try:
     match chosen_menu_item:
         case 1:
             clear_console()
-            print("Log in")
+            print("Login")
+            node = login()
         case 2:
             clear_console()
             print("Explore the blockchain")
         case 3:
             clear_console()
+            print("Sign up")
             registrate_user()
         case _:
             exit()
