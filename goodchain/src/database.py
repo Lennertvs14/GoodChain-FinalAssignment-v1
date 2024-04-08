@@ -42,3 +42,9 @@ def insert_node(connection, cursor, node):
                 VALUES (:username, :password_hash, :public_key, :private_key)
                 """, node_dict)
 
+
+@connect_to_database
+def get_node_by_username(connection, cursor, username):
+    """ Returns a node by username """
+    cursor.execute("SELECT * FROM Node WHERE Username = :username", {'username': username})
+    return cursor.fetchone()
