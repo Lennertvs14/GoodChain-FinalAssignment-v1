@@ -14,8 +14,8 @@ def login():
     max_amount_of_attempts = 7
     while attempts < max_amount_of_attempts:
         # Get necessary user input
-        username = input(" Enter a username -> ")
-        password = input(" Enter a password -> ")
+        username = input(" Enter a username -> ").strip()
+        password = input(" Enter a password -> ").strip()
 
         # Assert username
         node_entity = get_node_by_username(username)

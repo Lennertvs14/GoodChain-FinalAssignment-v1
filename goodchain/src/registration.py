@@ -20,8 +20,8 @@ def create_node():
     """" Returns a node object based on user input """
     from node import Node
     # Get necessary user input
-    username = input(" Enter a username -> ")
-    password = input(" Enter a password -> ")
+    username = input(" Enter a username -> ").strip()
+    password = input(" Enter a password -> ").strip()
 
     # Validate input
     if not validate_username(username):
