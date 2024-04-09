@@ -5,16 +5,14 @@ from cryptography.hazmat.primitives import serialization
 class Node:
     """ A Node represents a registered user. """
 
-    def __init__(self, username, password_hash):
+    def __init__(self, username, password_hash, public_key=None, private_key=None):
         self.username = username
         self.password_hash = password_hash
-        self.private_key, self.public_key = self.__generate_serialized_keys()
-
-    def __init__(self, username, password_hash, public_key, private_key):
-        self.username = username
-        self.password_hash = password_hash
-        self.public_key = public_key
-        self.private_key = private_key
+        if public_key and private_key:
+            self.public_key = public_key
+            self.private_key = private_key
+        else:
+            self.private_key, self.public_key = self.__generate_serialized_keys()
 
     def __generate_serialized_keys(self):
         """ Returns a serialized cryptographic private- and public key object """
