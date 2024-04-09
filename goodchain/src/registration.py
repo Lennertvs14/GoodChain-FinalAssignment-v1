@@ -6,7 +6,6 @@ import re
 from database import insert_node, get_node_by_username
 
 
-# Work variable(s)
 minimum_amount_of_password_characters = 14
 
 
