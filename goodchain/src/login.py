@@ -2,7 +2,7 @@
 
 
 # Imports
-from Classes.node import Node
+from node import Node
 from database import get_node_by_username
 import hashlib
 

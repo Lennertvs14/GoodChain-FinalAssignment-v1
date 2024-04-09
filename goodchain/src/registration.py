@@ -18,7 +18,7 @@ def registrate_user():
 
 def create_node():
     """" Returns a node object based on user input """
-    from Classes.node import Node
+    from node import Node
     # Get necessary user input
     username = input(" Enter a username -> ")
     password = input(" Enter a password -> ")
