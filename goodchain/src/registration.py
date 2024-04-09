@@ -34,6 +34,9 @@ def create_node():
         print("")
         return create_node()
 
+    input("Are you sure you want to proceed signing up with the information above?\n"
+          "Press enter if you wish to proceed, or else exit the application to abort.")
+
     # Get hash value of password to store to avoid storing the actual password in our database
     password_hash = get_password_hash_value(password)
 
