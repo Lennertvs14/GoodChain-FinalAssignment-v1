@@ -19,15 +19,16 @@ def registrate_user():
 def create_node():
     """" Returns a node object based on user input """
     from node import Node
-    # Get necessary user input
+    # Get node username
     username = input(" Enter a username -> ").strip()
-    password = input(" Enter a password -> ").strip()
 
-    # Validate input
     if not validate_username(username):
         # Let user try to sign up once again
         print("")
         return create_node()
+
+    # Get node password
+    password = input(" Enter a password -> ").strip()
 
     if not validate_password(password):
         # Let user try to sign up once again
