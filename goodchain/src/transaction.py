@@ -44,31 +44,26 @@ class Transaction:
             total_out = 0
             message = self.__gather_transaction_data()
 
-            # Search for valid signatures
-            for addr, amount in self.input:
-                found = False
-                # Do not allow a negative input amount
-                if amount < 0:
-                    return False
-                for s in self.signature:
-                    if signature.verify(message, s, addr):
-                        found = True
-                if not found:
-                    return False
-                total_in = total_in + amount
+            # Validate input
+            addr, amount = self.input
+            # Do not allow a negative input amount
+            if amount < 0:
+                return False
+            # Validate signature
+            if not signature.verify(message, self.signature, addr):
+                return False
+            total_in = total_in + amount
 
-            # Search for valid extra required signatures
-            for addr in self.extra_required_signature:
-                found = False
-                for s in self.signature:
-                    if signature.verify(message, s, addr):
-                        found = True
-                if not found:
+            # Validate extra required signatures
+            if self.extra_required_signature:
+                if not signature.verify(message, self.signature, self.extra_required_signature):
                     return False
-            for addr, amount in self.output:
-                if amount < 0:
-                    return False
-                total_out = total_out + amount
+
+            # Validate output
+            addr, amount = self.output
+            if amount < 0:
+                return False
+            total_out = total_out + amount
 
             # Outputs must not exceed inputs
             if total_out > total_in:
