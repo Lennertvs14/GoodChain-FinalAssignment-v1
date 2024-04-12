@@ -80,3 +80,21 @@ class Transaction:
         """ Returns a list of transaction data """
         return [self.input, self.output, self.extra_required_signature]
 
+    def __repr__(self):
+        result = "FROM = "
+        if self.input and self.type == NORMAL:
+            sender_username = get_node_username_by_public_key(self.input[0])
+            result += sender_username
+        else:
+            result += "REWARD SYSTEM"
+
+        result += " | TO = "
+        receiver_username = get_node_username_by_public_key(self.output[0])
+        result += receiver_username
+
+        result += " | AMOUNT = "
+        result += str(self.output[1])
+
+        result += " | TRANSACTION FEE = "
+        result += str(self.transaction_fee)
+        return result
