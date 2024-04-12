@@ -7,11 +7,9 @@ path = "../data/transaction_pool.dat"
 
 def add_transaction(transaction: Transaction):
     """ Adds transaction to the pool """
-    if transaction and transaction.is_valid():
+    if transaction:
         with open(path, "ab") as pool:
             pickle.dump(transaction, pool)
-    else:
-        ValueError("Invalid transaction")
 
 
 def check_pool():
@@ -28,5 +26,6 @@ def check_pool():
 
     transaction_count = 1
     for transaction in transactions:
-        print(f"[{transaction_count}] {transaction}")
-        transaction_count += 1
+        if transaction:
+            print(f"[{transaction_count}] {transaction}")
+            transaction_count += 1
