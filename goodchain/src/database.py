@@ -48,3 +48,10 @@ def get_node_by_username(connection, cursor, username):
     """ Returns a node by username """
     cursor.execute("SELECT * FROM Node WHERE Username = :username", {'username': username})
     return cursor.fetchone()
+
+
+@connect_to_database
+def get_node_username_by_public_key(connection, cursor, public_key):
+    """ Returns a node by username """
+    cursor.execute("SELECT Username FROM Node WHERE PublicKey = :publicKey", {'publicKey': public_key})
+    return cursor.fetchone()[0]
