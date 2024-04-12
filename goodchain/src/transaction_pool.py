@@ -27,6 +27,6 @@ def check_pool():
         pass
 
     transaction_count = 1
-    while transaction_count <= len(transactions):
+    for transaction in transactions:
         print(f"[{transaction_count}] {transaction}")
         transaction_count += 1
