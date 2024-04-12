@@ -4,16 +4,19 @@
 # Imports
 import re
 from database import insert_node, get_node_by_username
+from transaction import Transaction, REWARD
+import transaction_pool
 
 
 minimum_amount_of_password_characters = 14
+sign_up_reward = 50.0
 
 
 # Functions
 def registrate_user():
     node = create_node()
     insert_node(node)
-    # TODO: Give node a registration reward
+    grant_sign_up_reward(node)
 
 
 def create_node():
@@ -102,3 +105,14 @@ def validate_password(password):
         return False
 
     return True
+
+
+def grant_sign_up_reward(node):
+    """ Grants a reward transaction """
+    if node:
+        # Create transaction
+        reward_transaction = Transaction(transaction_type=REWARD)
+        reward_transaction.add_output(node.public_key, sign_up_reward)
+        transaction_pool.add_transaction(reward_transaction)
+    else:
+        Exception("There's no valid node to grant the reward to.")
