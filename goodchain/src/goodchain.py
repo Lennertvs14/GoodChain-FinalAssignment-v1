@@ -3,6 +3,7 @@ import os
 import platform
 from registration import registrate_user
 from login import login
+import transaction_pool
 
 
 node = None
@@ -45,8 +46,10 @@ def handle_public_menu_user_input():
                 clear_console()
                 print("Sign up")
                 registrate_user()
-            case _:
+            case 4:
                 exit()
+            case _:
+                raise ValueError("Invalid choice.")
     except ValueError:
         print("Enter digits only.")
 
@@ -107,16 +110,13 @@ def handle_private_menu_user_input():
 def run_goodchain_app():
     """ Runs the goodchain application """
     global node
-    # Start the application with a public menu interface
-    show_public_menu()
-    handle_public_menu_user_input()
-
     user_is_logged_in = node is not None
+
     if user_is_logged_in:
-        # TODO: Set up private menu (meant for logged in users only)
-        pass
+        show_private_menu()
+        handle_private_menu_user_input()
+        input("Press enter to continue.")
     else:
-        clear_console()
         # Start the application with a public menu interface
         show_public_menu()
         handle_public_menu_user_input()
