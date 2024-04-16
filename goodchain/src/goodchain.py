@@ -64,7 +64,7 @@ def show_private_menu():
         "4 - Explore the transaction pool\n"
         "5 - Mine\n"
         "6 - Show transaction history\n"
-        "7 - Exit\n"
+        "7 - Log out\n"
     )
 
 
@@ -78,6 +78,7 @@ def handle_private_menu_user_input():
             case 1:
                 clear_console()
                 print("Profile")
+                node.show_profile()
             case 2:
                 clear_console()
                 print("Explore the blockchain")

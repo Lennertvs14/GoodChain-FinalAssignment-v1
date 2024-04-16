@@ -17,6 +17,14 @@ class Node:
         else:
             self.private_key, self.public_key = self.__generate_serialized_keys()
 
+    def show_profile(self):
+        print(f"Username: {self.username}\n")
+        print("Public key: ")
+        print(fr"{str(self.public_key, encoding='utf-8')}")
+        print("Private key: ")
+        print(fr"{str(self.private_key, encoding='utf-8')}")
+
+
     def send_coins(self):
         """ Creates a transaction for a coin transfer to a given node (chosen by username) """
         print("Enter the exact username of the node you would like to transfer coins to.")
