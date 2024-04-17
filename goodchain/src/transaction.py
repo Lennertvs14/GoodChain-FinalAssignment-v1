@@ -1,6 +1,6 @@
-from database import get_node_username_by_public_key
+from database import Database
 import signature
-import uuid
+from uuid import uuid4
 
 
 NORMAL = 0
