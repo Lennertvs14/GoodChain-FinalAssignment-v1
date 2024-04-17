@@ -1,5 +1,6 @@
 import pickle
 from transaction import Transaction
+from user_interface import whitespace
 
 
 path = "../data/transaction_pool.dat"
@@ -47,7 +48,6 @@ class TransactionPool:
         """ Prints the current transaction pool """
         print("Transaction pool:")
         transactions = TransactionPool.get_transactions()
-        whitespace = "    "
         transaction_count = 1
         if transactions and len(transactions) > 0:
             for transaction in transactions:

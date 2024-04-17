@@ -2,6 +2,9 @@ import os
 import platform
 
 
+whitespace = "    "
+
+
 class UserInterface:
     """ Represents the console based user interface """
     @staticmethod
