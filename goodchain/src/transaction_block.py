@@ -8,14 +8,14 @@ timing_variable = 20
 
 class TransactionBlock(Block):
     def __init__(self, previous_block):
-        super(Block, self).__init__([], previous_block)
+        super(TransactionBlock, self).__init__([], previous_block)
 
     def add_transaction(self, transaction):
         self.data.append(transaction)
 
     def is_valid(self):
         """ Returns whether each transaction in the data list is valid """
-        if not super(Block, self).is_valid():
+        if not super(TransactionBlock, self).is_valid():
             return False
         for t in self.data:
             if not t.is_valid():
