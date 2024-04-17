@@ -30,7 +30,7 @@ class User:
     def __init__(self):
         self.database = Database()
 
-    def handle_public_menu_user_input(self):
+    def handle_menu_user_input(self):
         """ Handles user input for the public menu interface """
         chosen_menu_item = input("-> ")
         try:
