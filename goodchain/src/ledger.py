@@ -17,7 +17,7 @@ class Ledger:
     @staticmethod
     def show_ledger():
         """ Prints out the current ledger """
-        blocks = get_blocks()
+        blocks = Ledger.get_blocks()
         for block in blocks:
             if block:
                 print(block)
