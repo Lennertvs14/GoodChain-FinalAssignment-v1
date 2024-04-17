@@ -71,11 +71,12 @@ class Node:
                 case 7:
                     self.ui.clear_console()
                     print("You're logged out, thanks for using GoodChain!")
-                    node = None
+                    return None
                 case _:
                     raise ValueError("Invalid choice.")
         except ValueError:
             print("Enter valid digits only.")
+        return self
 
     def grant_reward(self, amount: float):
         """ Grants a reward by a transaction """
