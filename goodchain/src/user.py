@@ -1,10 +1,12 @@
 import re
 from database import Database
 from node import Node
-
+from ledger import Ledger
+from user_interface import UserInterface
 
 class User:
     """ Represents a user that is not logged in """
+    ui = UserInterface()
 
     @staticmethod
     def get_password_hash_value(password):
@@ -14,8 +16,44 @@ class User:
         digest.update(password.encode())
         return digest.hexdigest()
 
+    @staticmethod
+    def show_menu():
+        """ Shows the public menu (meant for users that aren't logged in) """
+        print("GoodChain Public Menu\n")
+        print(
+            "1 - Login\n"
+            "2 - Explore the blockchain\n"
+            "3 - Sign up\n"
+            "4 - Exit\n"
+        )
+
     def __init__(self):
         self.database = Database()
+
+    def handle_public_menu_user_input(self):
+        """ Handles user input for the public menu interface """
+        chosen_menu_item = input("-> ")
+        try:
+            chosen_menu_item = int(chosen_menu_item)
+            match chosen_menu_item:
+                case 1:
+                    self.ui.clear_console()
+                    print("Login")
+                    return self.login()
+                case 2:
+                    self.ui.clear_console()
+                    print("Explore the blockchain")
+                    Ledger.show_ledger()
+                case 3:
+                    self.ui.clear_console()
+                    print("Sign up")
+                    self.registrate()
+                case 4:
+                    exit()
+                case _:
+                    raise ValueError("Invalid choice.")
+        except ValueError:
+            print("Enter digits only.")
 
     def registrate(self):
         """ Registrates a new node """
