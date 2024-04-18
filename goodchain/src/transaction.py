@@ -14,9 +14,10 @@ class Transaction:
     extra_required_signature = None
 
     def __init__(self, transaction_type=NORMAL, transaction_fee=0):
-        self.id = uuid.uuid4()
+        self.id = uuid4()
         self.type = transaction_type
         self.transaction_fee = transaction_fee
+        self.valid = None # To be determined by mining process
 
     def add_input(self, from_addr, amount):
         self.input = (from_addr, amount)
@@ -76,20 +77,21 @@ class Transaction:
         return [self.input, self.output, self.extra_required_signature]
 
     def __repr__(self):
-        result = "FROM = "
+        db = Database()
+        result = "From: "
         if self.input and self.type == NORMAL:
-            sender_username = get_node_username_by_public_key(self.input[0])
+            sender_username = db.get_node_username_by_public_key(self.input[0])
             result += sender_username
         else:
             result += "REWARD SYSTEM"
 
-        result += " | TO = "
-        receiver_username = get_node_username_by_public_key(self.output[0])
+        result += " | To: "
+        receiver_username = db.get_node_username_by_public_key(self.output[0])
         result += receiver_username
 
-        result += " | AMOUNT = "
+        result += " | Amount: "
         result += str(self.output[1])
 
-        result += " | TRANSACTION FEE = "
+        result += " | Transaction fee: "
         result += str(self.transaction_fee)
         return result
