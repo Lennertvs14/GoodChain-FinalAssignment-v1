@@ -1,5 +1,6 @@
 import pickle
 from transaction_block import TransactionBlock
+from user_interface import whitespace
 
 
 path = "../data/ledger.dat"
@@ -18,9 +19,12 @@ class Ledger:
     def show_ledger():
         """ Prints out the current ledger """
         blocks = Ledger.get_blocks()
-        for block in blocks:
-            if block:
-                print(block)
+        if blocks is not None and len(blocks) > 0:
+            print("Blocks:")
+            for block in blocks:
+                print(whitespace + f"{block}")
+        else:
+            print("There are no blocks in our chain yet.")
 
     @staticmethod
     def get_blocks():
