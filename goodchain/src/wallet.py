@@ -1,5 +1,6 @@
 from ledger import Ledger
 from transaction_pool import TransactionPool
+from transaction import REWARD
 
 
 class Wallet:
@@ -33,15 +34,12 @@ class Wallet:
                 elif receiver_public_key == self.owner.public_key:
                     incoming += transaction.output[1]
 
-        result = incoming - outgoing
-
         pending_transactions = TransactionPool.get_transactions()
         for transaction in pending_transactions:
-            if transaction.valid:
-                # Reward transactions
-                receiver_public_key = transaction.output[0]
-                if receiver_public_key == self.owner.public_key:
-                    incoming = transaction.output[1]
-                    result += incoming
+            receiver_public_key = transaction.output[0]
+            if receiver_public_key == self.owner.public_key:
+                incoming += transaction.output[1]
+            elif transaction.type != REWARD and transaction.input[0] == self.owner.public_key:
+                outgoing += transaction.input[1]
 
-        return result
+        return incoming - outgoing
