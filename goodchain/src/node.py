@@ -111,23 +111,34 @@ class Node:
         print("\nEnter the exact amount of transaction fee.")
         transaction_fee = self.__get_transfer_amount()
 
+        # Balance validation
+        total_input = withdrawal_amount+transaction_fee
+        if self.wallet.available_balance < total_input:
+            print("You do not have enough balance, please try again later.")
+            return
+
         # Create transaction
         transaction = Transaction(transaction_fee=transaction_fee)
-        transaction.add_input(self.public_key, withdrawal_amount+transaction_fee)
+        transaction.add_input(self.public_key, total_input)
         transaction.add_output(recipient[2], withdrawal_amount)
 
         # Get confirmation
         print(f"\nAre you sure you want to proceed with the following transaction:"
               f"\n{transaction}")
-        input(f"\nPress enter if you wish to proceed, or else exit the application to abort.")
+        input(f"\nPress enter if you wish to proceed.")
 
         transaction.sign(self.private_key)
-        TransactionPool.add_transaction(transaction)
+        if transaction.is_valid():
+            TransactionPool.add_transaction(transaction)
+            print("Your transfer is successfully initialised!")
+        else:
+            print("Your transaction is invalid, please try again.")
 
     def __get_recipient_node_by_username(self):
         """ Returns a node chosen by the user to send coins to """
+        database = Database()
         recipient_username = input("Username -> ").strip()
-        recipient_node = get_node_by_username(recipient_username)
+        recipient_node = database.get_node_by_username(recipient_username)
         if recipient_node and recipient_node[0] != self.username:
             return recipient_node
         else:
