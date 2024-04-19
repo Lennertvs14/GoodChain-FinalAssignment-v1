@@ -1,6 +1,6 @@
-# Imports
 from user import User
 from user_interface import UserInterface
+from system import System
 
 
 ui = UserInterface()
@@ -11,7 +11,6 @@ def run_goodchain_app(node=None):
     """ Runs the GoodChain application """
     global ui, user
     user_is_logged_in = node is not None
-
     if user_is_logged_in:
         node.show_menu()
         node = node.handle_menu_user_input()
@@ -26,4 +25,8 @@ def run_goodchain_app(node=None):
 
 
 if __name__ == "__main__":
-    run_goodchain_app()
+    system = System()
+    if system.is_data_integrity_preserved():
+        run_goodchain_app()
+    else:
+        exit()

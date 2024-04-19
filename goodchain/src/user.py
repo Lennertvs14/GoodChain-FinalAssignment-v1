@@ -1,7 +1,8 @@
-import re
 from database import Database
-from node import Node
 from ledger import Ledger
+from node import Node
+import re
+from system import System
 from user_interface import UserInterface
 
 class User:
@@ -49,7 +50,7 @@ class User:
                     print("Sign up")
                     self.registrate()
                 case 4:
-                    exit()
+                    sys = System().exit()
                 case _:
                     raise ValueError("Invalid choice.")
         except ValueError:
@@ -109,7 +110,7 @@ class User:
             return self.__create_node()
 
         input("Are you sure you want to proceed signing up with the information above?\n"
-              "Press enter if you wish to proceed, or else exit the application to abort.")
+              "Press enter if you wish to proceed.")
 
         # Get hash value of password to store to avoid storing the actual password in our database
         password_hash = self.get_password_hash_value(password)

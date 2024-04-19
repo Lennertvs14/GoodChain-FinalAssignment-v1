@@ -2,7 +2,7 @@ import sqlite3
 from typing import List
 from transaction_block import TransactionBlock
 
-path = "../data/ledger.dat"
+path = "../data/database.db"
 
 class Database:
     """ Perform queries on the node database """
