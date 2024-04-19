@@ -94,4 +94,8 @@ class Transaction:
 
         result += " | Transaction fee: "
         result += str(self.transaction_fee)
+
+        if self.type != REWARD and self.valid:
+            result += " | Is valid: "
+            result += str(self.valid)
         return result
