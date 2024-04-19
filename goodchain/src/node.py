@@ -5,8 +5,9 @@ from ledger import Ledger
 from transaction import Transaction, REWARD
 from transaction_pool import TransactionPool
 from transaction_block import TransactionBlock
-from user_interface import UserInterface
+from user_interface import UserInterface, whitespace
 from wallet import Wallet
+from database import Database
 
 
 minimum_transactions = 5
@@ -24,6 +25,7 @@ class Node:
             self.private_key = private_key
         else:
             self.private_key, self.public_key = self.__generate_serialized_keys()
+        self.wallet = Wallet(self)
 
     def show_menu(self):
         """ Shows the private menu """
@@ -31,11 +33,12 @@ class Node:
         print(
             "1 - Profile\n"
             "2 - Explore the blockchain\n"
-            "3 - Send coins\n"
-            "4 - Explore the transaction pool\n"
-            "5 - Mine\n"
-            "6 - Show transaction history\n"
-            "7 - Log out\n"
+            "3 - Check balance\n"
+            "4 - Send coins\n"
+            "5 - Explore the transaction pool\n"
+            "6 - Mine\n"
+            "7 - Show transaction history\n"
+            "8 - Log out\n"
         )
 
     def handle_menu_user_input(self):
@@ -54,21 +57,25 @@ class Node:
                     Ledger.show_ledger()
                 case 3:
                     self.ui.clear_console()
+                    print("Check balance")
+                    print(self.wallet.available_balance)
+                case 4:
+                    self.ui.clear_console()
                     print("Send Coins")
                     self.send_coins()
-                case 4:
+                case 5:
                     self.ui.clear_console()
                     print("Explore the transaction pool")
                     TransactionPool.show_transaction_pool()
-                case 5:
+                case 6:
                     self.ui.clear_console()
                     print("Mine")
                     self.mine()
-                case 6:
+                case 7:
                     self.ui.clear_console()
                     print("Transaction history")
                     print(self.wallet.transactions)
-                case 7:
+                case 8:
                     self.ui.clear_console()
                     print("You're logged out, thanks for using GoodChain!")
                     return None
