@@ -23,13 +23,14 @@ class TransactionBlock(Block):
         return True
 
     def mine(self, leading_zero):
+        print("Mining..")
         digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
         digest.update(bytes(str(self.data), 'utf-8'))
         digest.update(bytes(str(self.previous_block_hash), 'utf-8'))
 
+        # Search for nonce
         found = False
         nonce = 0
-        # Search for nonce
         while not found:
             new_digest = digest.copy()
             new_digest.update(bytes(str(nonce), 'utf-8'))
@@ -42,3 +43,4 @@ class TransactionBlock(Block):
             del new_digest
 
         self.block_hash = self.compute_hash()
+        print(f"Block #{self.id} is mined.")

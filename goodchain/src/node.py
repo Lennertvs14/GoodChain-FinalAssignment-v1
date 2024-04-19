@@ -89,6 +89,7 @@ class Node:
         """ Grants a reward by a transaction """
         reward_transaction = Transaction(transaction_type=REWARD)
         reward_transaction.add_output(self.public_key, amount)
+        reward_transaction.valid = True # System created transactions such as reward transactions are always valid
         TransactionPool.add_transaction(reward_transaction)
 
     def show_profile(self):
@@ -99,6 +100,65 @@ class Node:
         print("Private key: ")
         print(fr"{str(self.private_key, encoding='utf-8')}")
 
+    def mine(self):
+        """ Mines a block if that's possible """
+        # Get data
+        transaction_pool = TransactionPool.get_transactions()
+        blocks = Ledger.get_blocks()
+
+        is_genesis_block = blocks is None or len(blocks) < 1
+
+        if not self.__validate_mining_conditions(transaction_pool, is_genesis_block):
+            return
+
+        # Get max amount of transactions
+        maximum_transactions = 10
+        if len(transaction_pool) < maximum_transactions:
+            # You cannot mine more than the available amount of transactions even if you wanted to
+            maximum_transactions = len(transaction_pool)
+
+        chosen_transactions = self.__get_transactions_to_mine(maximum_transactions)
+
+        # Get confirmation
+        input("Press enter if you wish to proceed.")
+        try:
+            valid_transactions = []
+            invalid_transactions = []
+
+            for i, transaction in enumerate(chosen_transactions):
+                if transaction.is_valid():
+                    transaction.valid = True
+                    valid_transactions.append(transaction)
+                else:
+                    invalid_transactions.append(transaction)
+
+            if is_genesis_block:
+                new_block = TransactionBlock(None)
+            else:
+                new_block = TransactionBlock(Ledger.get_last_block())
+
+            total_transaction_fee = 0.0
+            for valid_transaction in valid_transactions:
+                total_transaction_fee += valid_transaction.transaction_fee
+                new_block.add_transaction(valid_transaction)
+
+            leading_zeros = 2
+            new_block.mine(leading_zeros)
+            new_block.mined_by = self
+
+            # Add new block to ledger
+            Ledger.add_block(new_block)
+
+            print("\nCongrats, expect your reward soon!")
+
+            if new_block.is_valid():
+                # Remove valid transactions from pool
+                TransactionPool.remove_transactions(valid_transactions)
+
+            if len(invalid_transactions) > 0:
+                TransactionPool.flag_invalid_transactions(invalid_transactions)
+        except Exception as exc:
+            print("Something went wrong, please try again.")
 
     def send_coins(self):
         """ Creates a transaction for a coin transfer to a given node (chosen by username) """
@@ -133,6 +193,80 @@ class Node:
             print("Your transfer is successfully initialised!")
         else:
             print("Your transaction is invalid, please try again.")
+
+    def __validate_mining_conditions(self, transaction_pool, is_genesis_block):
+        """ Validates if GoodChain's mining conditions are met """
+        # Transaction pool validation
+        if 0 < len(transaction_pool) < minimum_transactions:
+            print(f"There are not enough transactions in the transaction pool, "
+                  f"there must be at least {minimum_transactions} transactions.")
+            return False
+
+        # Time interval validation
+        if not is_genesis_block:
+            last_block = Ledger.get_last_block()
+            last_block_creation_date = last_block.creation_date
+            current_time = datetime.now()
+            time_difference = current_time - last_block_creation_date
+            required_time_difference_in_minutes = 3
+            if time_difference < timedelta(minutes=required_time_difference_in_minutes):
+                print(f"It has not been {required_time_difference_in_minutes} minutes since the last block's creation.")
+                return False
+
+        # All checks passed
+        return True
+
+    def __get_transactions_to_mine(self, maximum_transactions, show_transactions=True):
+        """ Returns the transactions the user is allowed to mine """
+        chosen_transactions = []
+        # Prioritize reward transactions
+        reward_transactions = TransactionPool.get_reward_transactions()
+        required_transactions = 0
+        if len(reward_transactions) > 0:
+            print("You are required to mine at least the following reward transaction(s).")
+            for transaction in reward_transactions:
+                if required_transactions > maximum_transactions:
+                    break
+                print(whitespace + f"{transaction}")
+                chosen_transactions.append(transaction)
+                required_transactions += 1
+        # See if the user is still able to custom pick transactions
+        transactions_to_chose = maximum_transactions-required_transactions
+        print(f"You are allowed to choose {transactions_to_chose} transaction(s) your self.")
+        # Let a user chose transactions if applicable
+        if transactions_to_chose > 0:
+            # Show available transactions to choose from
+            if show_transactions and transactions_to_chose > 0:
+                TransactionPool.show_transaction_pool(with_reward_transactions=False)
+            # Get available transactions to choose from
+            available_transactions = TransactionPool.get_transactions(with_reward_transactions=False)
+            # Handle user input
+            print("Enter the identities of the transactions you'd like to mine one for one.")
+            print(f"Note: the loop will stop soon as you reach {transactions_to_chose} distinct transactions "
+                  f"or if you write 'done'.")
+            transaction_identities = []
+            while len(chosen_transactions) < maximum_transactions:
+                transaction_id = input("ID -> ").strip()
+                try:
+                    transaction_id = int(transaction_id)
+                    if transaction_id in transaction_identities:
+                        print("You have chosen this transaction already, please try another one.")
+                    elif 0 < transaction_id <= len(available_transactions):
+                        transaction_identities.append(transaction_id)
+                        transaction_index = transaction_id - 1
+                        chosen_transactions.append(available_transactions[transaction_index])
+                    else:
+                        print("Invalid id, please try again.")
+                except ValueError:
+                    if transaction_id.lower() == "done":
+                        if len(chosen_transactions) > minimum_transactions:
+                            break
+                        else:
+                            print(f"You must chose at least {minimum_transactions-len(chosen_transactions)} "
+                                  f"transaction(s) more.")
+                    else:
+                        print("Invalid id, please try again.")
+        return chosen_transactions
 
     def __get_recipient_node_by_username(self):
         """ Returns a node chosen by the user to send coins to """
