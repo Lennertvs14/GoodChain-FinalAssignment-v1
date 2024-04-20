@@ -43,13 +43,15 @@ class TransactionPool:
                 pickle.dump(transaction, pool)
 
     @staticmethod
-    def show_transaction_pool(with_reward_transactions=True):
+    def show_transaction_pool(with_reward_transactions=True, with_invalid_transactions=True):
         """ Prints the current transaction pool """
         print("Transaction pool:")
         transactions = TransactionPool.get_transactions()
         if transactions and len(transactions) > 0:
             for i, transaction in enumerate(transactions, start=1):
                 if transaction and (with_reward_transactions or transaction.type != REWARD):
+                    if not with_invalid_transactions and transaction.valid == False:
+                        continue
                     print(whitespace + f"[{i}] {transaction}")
         else:
             print(whitespace + "No transactions found.")

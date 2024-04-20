@@ -259,7 +259,7 @@ class Node:
         if transactions_to_chose > 0:
             # Show available transactions to choose from
             if show_transactions and transactions_to_chose > 0:
-                TransactionPool.show_transaction_pool(with_reward_transactions=False)
+                TransactionPool.show_transaction_pool(with_reward_transactions=False, with_invalid_transactions=False)
             # Get available transactions to choose from
             available_transactions = TransactionPool.get_transactions(with_reward_transactions=False)
             # Handle user input
