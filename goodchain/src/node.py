@@ -229,6 +229,11 @@ class Node:
             if time_difference < timedelta(minutes=required_time_difference_in_minutes):
                 print(f"It has not been {required_time_difference_in_minutes} minutes since the last block's creation.")
                 return False
+            # Last block validation
+            verified_block_status = block_status.get("VERIFIED")
+            if last_block.status != verified_block_status:
+                print(f"You can not mine a new block until its considered valid.")
+                return False
 
         # All checks passed
         return True
