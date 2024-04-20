@@ -2,7 +2,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from datetime import datetime, timedelta
 from ledger import Ledger
-from transaction import Transaction, REWARD
+from transaction import Transaction
 from transaction_pool import TransactionPool
 from transaction_block import TransactionBlock
 from user_interface import UserInterface, whitespace
@@ -84,13 +84,6 @@ class Node:
         except ValueError:
             print("Enter valid digits only.")
         return self
-
-    def grant_reward(self, amount: float):
-        """ Grants a reward by a transaction """
-        reward_transaction = Transaction(transaction_type=REWARD)
-        reward_transaction.add_output(self.public_key, amount)
-        reward_transaction.valid = True # System created transactions such as reward transactions are always valid
-        TransactionPool.add_transaction(reward_transaction)
 
     def show_profile(self):
         """ Prints profile (username, public key and private key) """

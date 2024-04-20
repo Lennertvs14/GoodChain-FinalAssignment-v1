@@ -1,7 +1,8 @@
 from database import path as database_path
 from hashlib import sha256
 from ledger import path as ledger_path
-from transaction_pool import path as transaction_pool_path
+from transaction import Transaction, REWARD
+from transaction_pool import TransactionPool, path as transaction_pool_path
 
 
 system_hash_path = "../data/system.dat"
@@ -9,6 +10,14 @@ system_hash_path = "../data/system.dat"
 
 class System:
     """ Represents the system-level operations and checks in the application """
+    @staticmethod
+    def grant_reward(receiver_node, amount: float):
+        """ Grants a reward to a node by initializing a transaction """
+        reward_transaction = Transaction(transaction_type=REWARD)
+        reward_transaction.add_output(receiver_node.public_key, amount)
+        reward_transaction.valid = True # System created transactions such as reward transactions are always valid
+        TransactionPool.add_transaction(reward_transaction)
+
     def __init__(self):
         self.system_hash = self.__get_system_hash()
 
