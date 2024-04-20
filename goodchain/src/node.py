@@ -155,6 +155,9 @@ class Node:
                 else:
                     invalid_transactions.append(transaction)
 
+            if not self.__validate_mining_conditions(valid_transactions, True):
+                return
+
             if is_genesis_block:
                 new_block = TransactionBlock(None)
             else:
@@ -180,7 +183,7 @@ class Node:
 
             if len(invalid_transactions) > 0:
                 TransactionPool.flag_invalid_transactions(invalid_transactions)
-        except Exception as exc:
+        except:
             print("Something went wrong, please try again.")
 
     def send_coins(self):
