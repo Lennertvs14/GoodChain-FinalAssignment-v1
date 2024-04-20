@@ -51,3 +51,15 @@ class Ledger:
             return all_blocks[-1]
         else:
             return None
+
+    @staticmethod
+    def update_block(updated_block: TransactionBlock):
+        """ Updates the ledger with the passed block """
+        blocks = Ledger.get_blocks()
+        for i, block in enumerate(blocks):
+            if block.id == updated_block.id:
+                blocks[i] = updated_block
+                break
+        with open(path, "wb") as ledger:
+            for block in blocks:
+                pickle.dump(block, ledger)

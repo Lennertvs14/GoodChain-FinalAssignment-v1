@@ -23,7 +23,7 @@ class TransactionBlock(Block):
         return True
 
     def mine(self, leading_zero):
-        print("Mining..")
+        print("\nMining..")
         digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
         digest.update(bytes(str(self.data), 'utf-8'))
         digest.update(bytes(str(self.previous_block_hash), 'utf-8'))

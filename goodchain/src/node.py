@@ -1,7 +1,9 @@
+from block import block_status
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from datetime import datetime, timedelta
 from ledger import Ledger
+from system import System
 from transaction import Transaction
 from transaction_pool import TransactionPool
 from transaction_block import TransactionBlock
@@ -26,6 +28,28 @@ class Node:
         else:
             self.private_key, self.public_key = self.__generate_serialized_keys()
         self.wallet = Wallet(self)
+        self.validate_last_block()
+
+    def validate_last_block(self):
+        """ Validates the last block in the ledger if applicable """
+        last_block = Ledger.get_last_block()
+
+        verified_block_status = block_status.get("VERIFIED")
+        if not last_block or last_block.status == verified_block_status:
+            return
+
+        if last_block.is_valid():
+            last_block.valid_flags += 1
+        else:
+            last_block.invalid_flags += 1
+
+        if last_block.valid_flags == 3:
+            last_block.status = verified_block_status
+            miners_reward = 50.0
+            System.grant_reward(last_block.miner, (miners_reward+last_block.total_transaction_fee))
+
+        last_block.validated_by.append(self.username)
+        Ledger.update_block(last_block)
 
     def show_menu(self):
         """ Shows the private menu """
@@ -137,7 +161,7 @@ class Node:
 
             leading_zeros = 2
             new_block.mine(leading_zeros)
-            new_block.mined_by = self
+            new_block.miner = self
 
             # Add new block to ledger
             Ledger.add_block(new_block)

@@ -5,6 +5,7 @@ import re
 from system import System
 from user_interface import UserInterface
 
+
 class User:
     """ Represents a user that is not logged in """
     ui = UserInterface()
@@ -61,7 +62,7 @@ class User:
         node = self.__create_node()
         self.database.insert_node(node)
         sign_up_reward = 50.0
-        node.grant_reward(sign_up_reward)
+        System.grant_reward(node, sign_up_reward)
 
     def login(self):
         """" Returns a node upon a successful login attempt """

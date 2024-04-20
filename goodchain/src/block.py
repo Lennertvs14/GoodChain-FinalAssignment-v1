@@ -11,12 +11,14 @@ block_status = {
     "VERIFIED": "VERIFIED"
 }
 
+
 class Block:
     data = None
     previous_block_hash = None
     creation_date = None
-    mined_by = None
-    validated_by = None
+    miner = None
+    validated_by = []
+
     def __init__(self, data, previous_block):
         self.id = uuid4()
         self.data = data
@@ -60,11 +62,11 @@ class Block:
             result += f"{t}"
             result += "\n"
 
-        result += whitespace + f"Mined by: {self.mined_by.username}\n"
+        result += whitespace + f"Mined by: {self.miner.username}\n"
         result += whitespace + f"Total transaction fee: {str(self.total_transaction_fee)}\n"
         result += whitespace + fr"Nonce: {str(self.nonce)}" + "\n"
         result += whitespace + f"Creation date: {str(self.creation_date)}\n"
-        result += whitespace + f"Validated by: [{str(self.validated_by)}]\n"
+        result += whitespace + f"Validated by: {str(self.validated_by)}\n"
         result += whitespace + f"Valid flags: {str(self.valid_flags)}\n"
         result += whitespace + f"Invalid flags: {str(self.invalid_flags)}\n"
         result += whitespace + f"Status: {str(self.status)}\n"
