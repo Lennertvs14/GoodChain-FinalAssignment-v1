@@ -35,7 +35,7 @@ class Node:
         last_block = Ledger.get_last_block()
 
         verified_block_status = block_status.get("VERIFIED")
-        if not last_block or last_block.status == verified_block_status or last_block.miner == self.username:
+        if not last_block or last_block.status == verified_block_status or last_block.miner.username == self.username:
             return
 
         if last_block.is_valid():
@@ -47,6 +47,12 @@ class Node:
             last_block.status = verified_block_status
             miners_reward = 50.0
             System.grant_reward(last_block.miner, (miners_reward+last_block.total_transaction_fee))
+        elif last_block.invalid_flags == 3:
+            # Return transactions to pool
+            for transaction in last_block.data:
+                TransactionPool.add_transaction(transaction)
+            # Remove block from ledger
+            Ledger.remove_block(last_block)
 
         last_block.validated_by.append(self.username)
         Ledger.update_block(last_block)

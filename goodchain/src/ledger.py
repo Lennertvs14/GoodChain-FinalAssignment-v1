@@ -63,3 +63,12 @@ class Ledger:
         with open(path, "wb") as ledger:
             for block in blocks:
                 pickle.dump(block, ledger)
+
+    @staticmethod
+    def remove_block(block_to_remove: TransactionBlock):
+        """ Removes the passed block from the ledger """
+        blocks = Ledger.get_blocks()
+        blocks = [block for block in blocks if block.id != block_to_remove.id]
+        with open(path, "wb") as ledger:
+            for block in blocks:
+                pickle.dump(block, ledger)
