@@ -35,7 +35,7 @@ class Node:
         last_block = Ledger.get_last_block()
 
         verified_block_status = block_status.get("VERIFIED")
-        if not last_block or last_block.status == verified_block_status:
+        if not last_block or last_block.status == verified_block_status or last_block.miner == self.username:
             return
 
         if last_block.is_valid():
