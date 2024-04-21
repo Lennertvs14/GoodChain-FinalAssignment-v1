@@ -59,7 +59,10 @@ class User:
 
     def registrate(self):
         """ Registrates a new node """
+        print("Write 'back' to go back.")
         node = self.__create_node()
+        if node is None:
+            return 
         self.database.insert_node(node)
         sign_up_reward = 50.0
         System.grant_reward(node, sign_up_reward)
@@ -98,23 +101,25 @@ class User:
     def __create_node(self):
         """" Returns a node object based on user input """
         # Get node username
-        username = input(" Enter a username -> ").strip()
-
-        if not self.__validate_username(username):
+        username = input("Enter a username -> ").strip()
+        if username == 'back':
+            return None
+        elif not self.__validate_username(username):
             # Let user try to sign up once again
-            print("") # Break line
+            print("")
             return self.__create_node()
 
         # Get node password
-        password = input(" Enter a password -> ").strip()
-
-        if not self.__validate_password(password):
+        password = input("Enter a password -> ").strip()
+        if password == 'back':
+            return None
+        elif not self.__validate_password(password):
             # Let user try to sign up once again
             print("")
             return self.__create_node()
 
         input("Are you sure you want to proceed signing up with the information above?\n"
-              "Press enter if you wish to proceed.")
+              "Press enter if you wish to proceed or exit the app.")
 
         # Get hash value of password to store to avoid storing the actual password in our database
         password_hash = self.get_password_hash_value(password)
@@ -125,12 +130,12 @@ class User:
     def __validate_username(self, username):
         # Empty check
         if not username:
-            print("Username cannot be empty.")
+            print("[FAILED] Username cannot be empty.")
             return False
 
         # Duplicate check
         if self.database.get_node_by_username(username) is not None:
-            print("Username already exists.")
+            print("[FAILED] Username already exists.")
             return False
 
         return True
@@ -140,34 +145,34 @@ class User:
 
         # Empty check
         if not password:
-            print("Password cannot be empty.")
+            print("[FAILED] Password cannot be empty.")
 
         # Type check
         if not isinstance(password, str):
-            print("Password must contain letters as well.")
+            print("[FAILED] Password must contain letters as well.")
             return False
 
         # Length check
         if len(password) < minimum_amount_of_password_characters:
-            print(f"Password must be at least {minimum_amount_of_password_characters} characters long.")
+            print(f"[FAILED] Password must be at least {minimum_amount_of_password_characters} characters long.")
             return False
 
         # Uppercase check
         if not re.search("[A-Z]", password):
-            print("Password must contain at least one uppercase letter.")
+            print("[FAILED] Password must contain at least one uppercase letter.")
             return False
         # Lowercase check
         elif not re.search("[a-z]", password):
-            print("Password must contain at least one lowercase letter.")
+            print("[FAILED] Password must contain at least one lowercase letter.")
 
         # Digit check
         if not re.search("[0-9]", password):
-            print("Password must contain at least one digit.")
+            print("[FAILED] Password must contain at least one digit.")
             return False
 
         # Special character check
         if not re.search("[!@#$%^&*()]", password):
-            print("Password must contain at least one special character: (!@#$%^&*()).")
+            print("[FAILED] Password must contain at least one special character: (!@#$%^&*()).")
             return False
 
         return True

@@ -194,7 +194,7 @@ class Node:
         chosen_transactions = self.__get_transactions_to_mine(maximum_transactions)
 
         # Get confirmation
-        input("Press enter if you wish to proceed.")
+        input("Press enter if you wish to proceed or exit the app.")
         try:
             valid_transactions = []
             invalid_transactions = []
