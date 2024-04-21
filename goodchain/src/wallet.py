@@ -75,7 +75,7 @@ class Wallet:
         pending_transactions = TransactionPool.get_transactions()
         for transaction in pending_transactions:
             receiver_public_key = transaction.output[0]
-            if receiver_public_key == self.owner.public_key:
+            if transaction.type == REWARD and receiver_public_key == self.owner.public_key:
                 incoming += transaction.output[1]
             elif transaction.type != REWARD and transaction.input[0] == self.owner.public_key:
                 outgoing += transaction.input[1]
