@@ -27,12 +27,11 @@ class Wallet:
         outgoing = 0.0
         for block in Ledger.get_blocks():
             for transaction in block.data: # processed transactions list
-                sender_public_key = transaction.input[0]
                 receiver_public_key = transaction.output[0]
-                if sender_public_key == self.owner.public_key:
-                    outgoing += transaction.input[1]
-                elif receiver_public_key == self.owner.public_key:
+                if receiver_public_key == self.owner.public_key:
                     incoming += transaction.output[1]
+                elif transaction.type != REWARD and transaction.input[0] == self.owner.public_key:
+                    outgoing += transaction.input[1]
 
         pending_transactions = TransactionPool.get_transactions()
         for transaction in pending_transactions:
