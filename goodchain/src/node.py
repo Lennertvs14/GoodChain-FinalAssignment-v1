@@ -4,7 +4,7 @@ from cryptography.hazmat.primitives import serialization
 from datetime import datetime, timedelta
 from ledger import Ledger
 from system import System
-from transaction import Transaction
+from transaction import Transaction, REWARD
 from transaction_pool import TransactionPool
 from transaction_block import TransactionBlock
 from user_interface import UserInterface, whitespace
@@ -66,11 +66,12 @@ class Node:
             "2 - Explore the blockchain\n"
             "3 - Check balance\n"
             "4 - Send coins\n"
-            "5 - Explore the transaction pool\n"
-            "6 - Mine\n"
-            "7 - Validate block(s)\n"
-            "8 - Show transaction history\n"
-            "9 - Log out\n"
+            "5 - Cancel transaction\n"
+            "6 - Explore the transaction pool\n"
+            "7 - Mine\n"
+            "8 - Validate block(s)\n"
+            "9 - Show transaction history\n"
+            "10 - Log out\n"
         )
 
     def handle_menu_user_input(self):
@@ -97,20 +98,25 @@ class Node:
                     self.send_coins()
                 case 5:
                     self.ui.clear_console()
+                    print("Cancel a transaction")
+                    self.cancel_pending_transaction()
+                case 6:
+                    self.ui.clear_console()
                     print("Explore the transaction pool")
                     TransactionPool.show_transaction_pool()
-                case 6:
+                case 7:
                     self.ui.clear_console()
                     print("Mine")
                     self.mine()
-                case 7:
+                case 8:
                     self.ui.clear_console()
                     print("Validate block(s)")
-                case 8:
+                    self.validate_block()
+                case 9:
                     self.ui.clear_console()
                     print("Transaction history")
                     print(self.wallet.transactions)
-                case 9:
+                case 10:
                     self.ui.clear_console()
                     print("You're logged out, thanks for using GoodChain!")
                     return None
@@ -225,6 +231,46 @@ class Node:
             print("Your transfer is successfully initialised!")
         else:
             print("Your transaction is invalid, please try again.")
+
+    def cancel_pending_transaction(self):
+        """ Cancels a pending transaction if possible """
+        # Get applicable transactions
+        pending_transactions = []
+        for transaction in TransactionPool.get_transactions(with_reward_transactions=False):
+            sender_public_key = transaction.input[0]
+            receiver_public_key = transaction.output[0]
+            if sender_public_key == self.public_key:
+                pending_transactions.append(transaction)
+            elif receiver_public_key == self.public_key:
+                pending_transactions.append(transaction)
+
+        if len(pending_transactions) < 1:
+            print("[FAILED] Only pending transactions can be cancelled, none where found.")
+            return
+
+
+        # Show applicable transactions
+        for i, transaction in enumerate(pending_transactions, start=1):
+            print(f"[{i}] {transaction}")
+
+        # Get transaction to cancel
+        transaction_to_cancel = None
+        print("Enter the ID of the transaction you'd like to cancel.")
+        while transaction_to_cancel is None:
+            transaction_id = input("ID -> ").strip()
+            try:
+                transaction_id = int(transaction_id)
+                if 0 < transaction_id <= len(pending_transactions):
+                    transaction_index = transaction_id - 1
+                    transaction_to_cancel = pending_transactions[transaction_index]
+                    break
+                else:
+                    print("Invalid id, please try again.")
+            except ValueError:
+                    print("Invalid id, please try again.")
+
+        TransactionPool.remove_transactions([transaction_to_cancel])
+        print("Your transaction is successfully canceled.")
 
     def __validate_mining_conditions(self, transaction_pool, is_genesis_block):
         """ Validates if GoodChain's mining conditions are met """
