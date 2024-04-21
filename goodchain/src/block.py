@@ -17,7 +17,7 @@ class Block:
     previous_block_hash = None
     creation_date = None
     miner = None
-    validated_by = []
+    validated_by = ""
 
     def __init__(self, data, previous_block):
         self.id = uuid4()

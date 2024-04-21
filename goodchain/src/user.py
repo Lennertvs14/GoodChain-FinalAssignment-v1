@@ -62,7 +62,7 @@ class User:
         print("Write 'back' to go back.")
         node = self.__create_node()
         if node is None:
-            return 
+            return
         self.database.insert_node(node)
         sign_up_reward = 50.0
         System.grant_reward(node, sign_up_reward)

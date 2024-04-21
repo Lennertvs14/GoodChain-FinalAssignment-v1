@@ -41,6 +41,10 @@ class Node:
         if not last_block or last_block.status == verified_block_status or last_block.miner.username == self.username:
             return
 
+        validators = last_block.validated_by.split()
+        if self.username in validators:
+            return
+
         if last_block.is_valid():
             last_block.valid_flags += 1
         else:
@@ -57,7 +61,7 @@ class Node:
             # Remove block from ledger
             Ledger.remove_block(last_block)
 
-        last_block.validated_by.append(self.username)
+        last_block.validated_by += " " + self.username
         Ledger.update_block(last_block)
 
     def show_notifications(self):
@@ -266,7 +270,7 @@ class Node:
             # Remove block from ledger
             Ledger.remove_block(last_block)
 
-        last_block.validated_by.append(self.username)
+        last_block.validated_by += " " + self.username
         Ledger.update_block(last_block)
         print("You successfully validated this block")
 
