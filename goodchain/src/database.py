@@ -1,8 +1,9 @@
 import sqlite3
-from typing import List
 from transaction_block import TransactionBlock
 
+
 path = "../data/database.db"
+
 
 class Database:
     """ Perform queries on the node database """
@@ -29,12 +30,13 @@ class Database:
                 Username text,
                 PasswordHash text,
                 PublicKey text,
-                PrivateKey text
+                PrivateKey text,
+                LastLogin DATETIME
             )"""
         )
 
     @handle_connection
-    def insert_node(self, node: TransactionBlock):
+    def insert_node(self, node):
         """ Inserts a node into the database """
         node_dict = {
             'username': node.username,
@@ -43,7 +45,7 @@ class Database:
             'private_key': node.private_key
         }
         self.cursor.execute(
-            """ INSERT INTO Node 
+            """ INSERT INTO Node (Username, PasswordHash, PublicKey, PrivateKey)
                 VALUES (:username, :password_hash, :public_key, :private_key)
                 """, node_dict)
 
@@ -58,3 +60,21 @@ class Database:
         """ Returns a node by username """
         self.cursor.execute("SELECT Username FROM Node WHERE PublicKey = :publicKey", {'publicKey': public_key})
         return self.cursor.fetchone()[0]
+
+    @handle_connection
+    def get_last_login_date(self, username: str):
+        """ Returns the last time a node logged in """
+        node = self.get_node_by_username(username)
+        if node:
+            return node[-1]
+        else:
+            return None
+
+    @handle_connection
+    def update_last_login_date(self, username: str):
+        """ Updates the last login date for a node """
+        self.cursor.execute(
+            """ UPDATE Node 
+                SET LastLogin = CURRENT_TIMESTAMP
+                WHERE Username = :username
+                """, {'username': username})
