@@ -39,15 +39,12 @@ class TransactionBlock(Block):
             new_hash = new_digest.finalize()
             if new_hash[:leading_zero] == bytes('0' * leading_zero, 'utf-8'):
                 if int(new_hash[leading_zero]) < timing_variable:
-                    end = time()
-                    computation_time = end - start
-                    if 10 <= computation_time <= 20:
-                        found = True
-                        self.nonce = nonce
-                        self.block_hash = self.compute_hash()
-                        print(f"Block #{self.id} is mined in {computation_time} seconds.")
-                    elif computation_time > 15:
-                        print("Mining took too long. Adjusting difficulty and restarting.")
-                        leading_zero -= 1
+                    found = True
+                    self.nonce = nonce
             nonce += 1
             del new_digest
+
+        end = time()
+        computation_time = end - start
+        self.block_hash = self.compute_hash()
+        print(f"Block #{self.id} is mined in {computation_time} seconds.")
