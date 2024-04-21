@@ -27,8 +27,8 @@ class System:
         if not self.system_hash == current_system_hash:
             print("System startup aborted: Integrity check failed.\n"
                   "Unauthorized modifications have been detected in the system files.\n"
-                  "Please contact your system administrator or support for assistance.")
-            return False
+                  "Undo your modifications or contact GoodChain's helpdesk for support (support@goodchain.com).")
+            self.exit()
         else:
             return True
 

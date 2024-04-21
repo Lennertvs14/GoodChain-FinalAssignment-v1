@@ -28,5 +28,3 @@ if __name__ == "__main__":
     system = System()
     if system.is_data_integrity_preserved():
         run_goodchain_app()
-    else:
-        exit()
