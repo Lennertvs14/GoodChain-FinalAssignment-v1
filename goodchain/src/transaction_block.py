@@ -1,6 +1,7 @@
 from block import Block
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
+from time import time
 
 
 timing_variable = 20
@@ -24,6 +25,7 @@ class TransactionBlock(Block):
 
     def mine(self, leading_zero):
         print("\nMining..")
+        start = time()
         digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
         digest.update(bytes(str(self.data), 'utf-8'))
         digest.update(bytes(str(self.previous_block_hash), 'utf-8'))
@@ -42,5 +44,7 @@ class TransactionBlock(Block):
             nonce += 1
             del new_digest
 
+        end = time()
+        computation_time = end - start
         self.block_hash = self.compute_hash()
-        print(f"Block #{self.id} is mined.")
+        print(f"Block #{self.id} is mined in {computation_time} seconds.")
