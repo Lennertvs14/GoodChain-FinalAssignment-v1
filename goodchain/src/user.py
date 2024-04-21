@@ -35,6 +35,8 @@ class User:
     def handle_menu_user_input(self):
         """ Handles user input for the public menu interface """
         chosen_menu_item = input("-> ")
+        system = System()
+        system.is_data_integrity_preserved()
         try:
             chosen_menu_item = int(chosen_menu_item)
             match chosen_menu_item:
@@ -51,7 +53,7 @@ class User:
                     print("Sign up")
                     self.registrate()
                 case 4:
-                    System().exit()
+                    system.exit()
                 case _:
                     raise ValueError("Invalid choice.")
         except ValueError:

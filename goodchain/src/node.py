@@ -5,7 +5,7 @@ from database import Database
 from datetime import datetime, timedelta
 from ledger import Ledger
 from system import System
-from transaction import Transaction, REWARD
+from transaction import Transaction
 from transaction_pool import TransactionPool
 from transaction_block import TransactionBlock
 from user_interface import UserInterface, whitespace
@@ -97,7 +97,6 @@ class Node:
         input("Press enter to continue.")
         return
 
-
     def show_menu(self):
         """ Shows the private menu """
         print("Node Menu")
@@ -117,6 +116,7 @@ class Node:
     def handle_menu_user_input(self):
         """ Handles user input for the private menu interface """
         chosen_menu_item = input("-> ")
+        System().is_data_integrity_preserved()
         try:
             chosen_menu_item = int(chosen_menu_item)
             match chosen_menu_item:
