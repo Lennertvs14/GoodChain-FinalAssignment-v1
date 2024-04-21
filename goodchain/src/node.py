@@ -212,7 +212,7 @@ class Node:
         # Balance validation
         total_input = withdrawal_amount+transaction_fee
         if self.wallet.available_balance < total_input:
-            print("You do not have enough balance, please try again later.")
+            print("[FAILED] You do not have enough balance.")
             return
 
         # Create transaction
@@ -222,8 +222,8 @@ class Node:
 
         # Get confirmation
         print(f"\nAre you sure you want to proceed with the following transaction:"
-              f"\n{transaction}")
-        input(f"\nPress enter if you wish to proceed.")
+              f"\n{whitespace + transaction}")
+        input(f"Press enter if you are.\n")
 
         transaction.sign(self.private_key)
         if transaction.is_valid():

@@ -51,7 +51,7 @@ class User:
                     print("Sign up")
                     self.registrate()
                 case 4:
-                    sys = System().exit()
+                    System().exit()
                 case _:
                     raise ValueError("Invalid choice.")
         except ValueError:
@@ -87,6 +87,9 @@ class User:
             remaining_attempts = (max_amount_of_attempts - attempts) - 1
             print(f"Failed to login, you have {remaining_attempts} attempt(s) left.\n")
             attempts += 1
+
+        # User tried too many times
+        System().exit()
 
     def __create_node_from_entity(self, node_entity):
         """ Create a Node object from a node entity """
