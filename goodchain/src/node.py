@@ -55,6 +55,7 @@ class Node:
             Ledger.remove_block(last_block)
 
         last_block.validated_by.append(self.username)
+        print(last_block.validated_by)
         Ledger.update_block(last_block)
 
     def show_menu(self):
@@ -105,7 +106,6 @@ class Node:
                 case 7:
                     self.ui.clear_console()
                     print("Validate block(s)")
-                    self.mine()
                 case 8:
                     self.ui.clear_console()
                     print("Transaction history")
@@ -176,6 +176,7 @@ class Node:
             leading_zeros = 2
             new_block.mine(leading_zeros)
             new_block.miner = self
+            new_block.total_transaction_fee = total_transaction_fee
 
             # Add new block to ledger
             Ledger.add_block(new_block)
@@ -255,42 +256,42 @@ class Node:
     def __get_transactions_to_mine(self, maximum_transactions, show_transactions=True):
         """ Returns the transactions the user is allowed to mine """
         chosen_transactions = []
+        chosen_transaction_identities = []
         # Prioritize reward transactions
         reward_transactions = TransactionPool.get_reward_transactions()
         required_transactions = 0
         if len(reward_transactions) > 0:
             print("You are required to mine at least the following reward transaction(s).")
-            for transaction in reward_transactions:
+            for i, transaction in enumerate(reward_transactions):
                 if required_transactions > maximum_transactions:
                     break
                 print(whitespace + f"{transaction}")
                 chosen_transactions.append(transaction)
+                chosen_transaction_identities.append(i)
                 required_transactions += 1
         # See if the user is still able to custom pick transactions
         transactions_to_chose = maximum_transactions-required_transactions
         print(f"You are allowed to choose {transactions_to_chose} transaction(s) your self.")
         # Let a user chose transactions if applicable
         if transactions_to_chose > 0:
+            all_transactions = TransactionPool.get_transactions()
             # Show available transactions to choose from
             if show_transactions and transactions_to_chose > 0:
                 TransactionPool.show_transaction_pool(with_reward_transactions=False, with_invalid_transactions=False)
-            # Get available transactions to choose from
-            available_transactions = TransactionPool.get_transactions(with_reward_transactions=False)
             # Handle user input
             print("Enter the identities of the transactions you'd like to mine one for one.")
             print(f"Note: the loop will stop soon as you reach {transactions_to_chose} distinct transactions "
                   f"or if you write 'done'.")
-            transaction_identities = []
             while len(chosen_transactions) < maximum_transactions:
                 transaction_id = input("ID -> ").strip()
                 try:
                     transaction_id = int(transaction_id)
-                    if transaction_id in transaction_identities:
+                    if transaction_id in chosen_transaction_identities:
                         print("You have chosen this transaction already, please try another one.")
-                    elif 0 < transaction_id <= len(available_transactions):
-                        transaction_identities.append(transaction_id)
+                    elif 0 < transaction_id <= len(all_transactions):
+                        chosen_transaction_identities.append(transaction_id)
                         transaction_index = transaction_id - 1
-                        chosen_transactions.append(available_transactions[transaction_index])
+                        chosen_transactions.append(all_transactions[transaction_index])
                     else:
                         print("Invalid id, please try again.")
                 except ValueError:
