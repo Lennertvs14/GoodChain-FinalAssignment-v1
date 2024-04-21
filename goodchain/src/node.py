@@ -275,11 +275,20 @@ class Node:
         print("Enter the exact username of the node you would like to transfer coins to.")
         recipient = self.__get_recipient_node_by_username()
 
+        if recipient is None:
+            return
+
         print(f"\nEnter the exact amount of coins you would like to transfer to {recipient[0]}.")
         withdrawal_amount = self.__get_transfer_amount()
 
+        if withdrawal_amount is None:
+            return
+
         print("\nEnter the exact amount of transaction fee.")
         transaction_fee = self.__get_transfer_amount()
+
+        if transaction_fee is None:
+            return
 
         # Balance validation
         total_input = withdrawal_amount+transaction_fee
@@ -425,7 +434,10 @@ class Node:
 
     def __get_recipient_node_by_username(self):
         """ Returns a node chosen by the user to send coins to """
-        recipient_username = input("Username -> ").strip()
+        recipient_username = input("Write 'back' to go back.\n"
+                                   "Username -> ").strip()
+        if recipient_username == 'back':
+            return None
         recipient_node = self.database.get_node_by_username(recipient_username)
         if recipient_node and recipient_node[0] != self.username:
             return recipient_node
@@ -438,7 +450,10 @@ class Node:
         Prompts the user to specify the amount of coins to transfer.
         Returns the amount of coins the user would like to transfer.
         """
-        amount = input("Amount -> ").strip()
+        amount = input("Write 'back' to go back.\n"
+                       "Amount -> ").strip()
+        if amount == 'back':
+            return None
         try:
             float_value = float(amount.replace(',', '.'))
             return float_value
