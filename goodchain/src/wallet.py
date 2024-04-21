@@ -36,14 +36,22 @@ class Wallet:
 
         result += "\n"
 
-        # Get outgoing transactions from transaction pool
+        # Get transactions from transaction pool
         result += "UNPROCESSED TRANSACTIONS:\n"
+        credit = []
         debet = []
         for transaction in TransactionPool.get_transactions():
-            if transaction.type != REWARD and transaction.input[0] == self.owner.public_key:
+            receiver_public_key = transaction.output[0]
+            if transaction.type == REWARD and receiver_public_key == self.owner.public_key:
+                credit.append(transaction)
+            elif transaction.type != REWARD and transaction.input[0] == self.owner.public_key:
                 debet.append(transaction)
 
         # Include grouped unprocessed transactions
+        if len(credit) > 0:
+            result += "+ TO RECEIVE +\n"
+            for t in credit:
+                result += whitespace + f"{t}\n"
         if len(debet) > 0:
             result += "- TO SEND -\n"
             for t in debet:
