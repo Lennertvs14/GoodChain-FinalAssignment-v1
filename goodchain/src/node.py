@@ -185,16 +185,17 @@ class Node:
             new_block.total_transaction_fee = total_transaction_fee
 
             # Add new block to ledger
-            Ledger.add_block(new_block)
+            if new_block.block_hash:
+                Ledger.add_block(new_block)
 
-            print("\nCongrats, expect your reward soon!")
+                print("\nCongrats, expect your reward soon!")
 
-            if new_block.is_valid():
-                # Remove valid transactions from pool
-                TransactionPool.remove_transactions(valid_transactions)
+                if new_block.is_valid():
+                    # Remove valid transactions from pool
+                    TransactionPool.remove_transactions(valid_transactions)
 
-            if len(invalid_transactions) > 0:
-                TransactionPool.flag_invalid_transactions(invalid_transactions)
+                if len(invalid_transactions) > 0:
+                    TransactionPool.flag_invalid_transactions(invalid_transactions)
         except:
             print("Something went wrong, please try again.")
 
@@ -222,7 +223,7 @@ class Node:
 
         # Get confirmation
         print(f"\nAre you sure you want to proceed with the following transaction:"
-              f"\n{whitespace + transaction}")
+              f"\n{whitespace}{transaction}")
         input(f"Press enter if you are.\n")
 
         transaction.sign(self.private_key)

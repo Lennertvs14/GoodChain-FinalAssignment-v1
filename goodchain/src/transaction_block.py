@@ -26,7 +26,6 @@ class TransactionBlock(Block):
     def mine(self, leading_zero):
         print("\nMining..")
         start_time = time()
-        end_time = None
 
         digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
         digest.update(bytes(str(self.data), 'utf-8'))
@@ -44,12 +43,10 @@ class TransactionBlock(Block):
                     found = True
                     end_time = time()
                     self.nonce = nonce
-                elif (time() - start_time) > 20:
-                    print("The mining process took too long, please try again later.")
-                    return
+                    self.block_hash = self.compute_hash()
+                    print(f"Block #{self.id} is mined in {end_time - start_time} seconds.")
+            elif (time() - start_time) > 20:
+                print("The mining process took too long, please try again later.")
+                break
             nonce += 1
             del new_digest
-
-        computation_time = end_time - start_time
-        self.block_hash = self.compute_hash()
-        print(f"Block #{self.id} is mined in {computation_time} seconds.")
