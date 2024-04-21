@@ -1,6 +1,7 @@
 from ledger import Ledger
 from transaction_pool import TransactionPool
 from transaction import REWARD
+from user_interface import whitespace
 
 
 class Wallet:
@@ -10,15 +11,45 @@ class Wallet:
 
     @property
     def transactions(self):
-        """ Returns processed transactions """
+        """ Returns transaction history string """
         # Get transactions from ledger
-        processed_transactions = []
-        blocks = Ledger.get_blocks()
-        for block in blocks:
-            # Get processed transactions
-            # public key asserts
-            pass
-        return processed_transactions
+        result = "PROCESSED TRANSACTIONS:\n"
+        credit = []
+        debet = []
+        for block in Ledger.get_blocks():
+            for transaction in block.data:
+                receiver_public_key = transaction.output[0]
+                if receiver_public_key == self.owner.public_key:
+                    credit.append(transaction)
+                elif transaction.type != REWARD and transaction.input[0] == self.owner.public_key:
+                    debet.append(transaction)
+
+        # Include grouped processed transactions
+        if len(credit) > 0:
+            result += "+ RECEIVED +\n"
+            for t in credit:
+                result += whitespace + f"{t}\n"
+        if len(debet) > 0:
+            result += "- SEND -\n"
+            for t in debet:
+                result += whitespace + f"{t}\n"
+
+        result += "\n"
+
+        # Get outgoing transactions from transaction pool
+        result += "UNPROCESSED TRANSACTIONS:\n"
+        debet = []
+        for transaction in TransactionPool.get_transactions():
+            if transaction.type != REWARD and transaction.input[0] == self.owner.public_key:
+                debet.append(transaction)
+
+        # Include grouped unprocessed transactions
+        if len(debet) > 0:
+            result += "- TO SEND -\n"
+            for t in debet:
+                result += whitespace + f"{t}\n"
+
+        return result
 
     @property
     def available_balance(self):

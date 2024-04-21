@@ -67,8 +67,9 @@ class Node:
             "4 - Send coins\n"
             "5 - Explore the transaction pool\n"
             "6 - Mine\n"
-            "7 - Show transaction history\n"
-            "8 - Log out\n"
+            "7 - Validate block(s)\n"
+            "8 - Show transaction history\n"
+            "9 - Log out\n"
         )
 
     def handle_menu_user_input(self):
@@ -103,9 +104,13 @@ class Node:
                     self.mine()
                 case 7:
                     self.ui.clear_console()
+                    print("Validate block(s)")
+                    self.mine()
+                case 8:
+                    self.ui.clear_console()
                     print("Transaction history")
                     print(self.wallet.transactions)
-                case 8:
+                case 9:
                     self.ui.clear_console()
                     print("You're logged out, thanks for using GoodChain!")
                     return None
