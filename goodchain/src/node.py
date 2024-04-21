@@ -1,6 +1,7 @@
 from block import block_status
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
+from database import Database
 from datetime import datetime, timedelta
 from ledger import Ledger
 from system import System
@@ -9,7 +10,6 @@ from transaction_pool import TransactionPool
 from transaction_block import TransactionBlock
 from user_interface import UserInterface, whitespace
 from wallet import Wallet
-from database import Database
 
 
 minimum_transactions = 5
@@ -18,8 +18,9 @@ minimum_transactions = 5
 class Node:
     """ A Node represents a registered user. """
     ui = UserInterface()
+    database = Database()
 
-    def __init__(self, username, password_hash, public_key=None, private_key=None):
+    def __init__(self, username, password_hash, public_key=None, private_key=None, show_notifications=False):
         self.username = username
         self.password_hash = password_hash
         if public_key and private_key:
@@ -29,6 +30,8 @@ class Node:
             self.private_key, self.public_key = self.__generate_serialized_keys()
         self.wallet = Wallet(self)
         self.validate_last_block()
+        if show_notifications:
+            self.show_notifications()
 
     def validate_last_block(self):
         """ Validates the last block in the ledger if applicable """
@@ -55,12 +58,49 @@ class Node:
             Ledger.remove_block(last_block)
 
         last_block.validated_by.append(self.username)
-        print(last_block.validated_by)
         Ledger.update_block(last_block)
+
+    def show_notifications(self):
+        """ Shows notifications """
+        print(f"\nWelcome {self.username}, here are your notifications:\n")
+
+        # Show amount of mined blocks
+        current_blocks = Ledger.get_blocks()
+        chain_length = len(current_blocks)
+        print(f"GoodChain currently has {chain_length} block(s) in the ledger.")
+
+        last_login_date = self.database.get_last_login_date(self.username)
+        if last_login_date is None:
+            print("This is your first login, there's nothing more to show.")
+            input("Press enter to continue.")
+            self.database.update_last_login_date(self.username)
+            return
+
+        # Parse the date and time
+        last_login_date = datetime.strptime(last_login_date, "%Y-%m-%d %H:%M:%S")
+        print(f"Your last login was at {last_login_date.date()}.")
+        self.database.update_last_login_date(self.username)
+
+        print("These are new blocks added to our chain:")
+        new_blocks = []
+        for block in current_blocks:
+            if block.creation_date > last_login_date:
+                new_blocks.append(block)
+                print(whitespace + f"{block}")
+
+        print()
+
+        for block in new_blocks:
+            if block.miner == self.username:
+                print(f"The block #{block.id} which you mined is {block.status}")
+
+        input("Press enter to continue.")
+        return
+
 
     def show_menu(self):
         """ Shows the private menu """
-        print(f"Welcome {self.username}\n")
+        print("Node Menu")
         print(
             "1 - Profile\n"
             "2 - Explore the blockchain\n"
@@ -198,6 +238,37 @@ class Node:
                     TransactionPool.flag_invalid_transactions(invalid_transactions)
         except:
             print("Something went wrong, please try again.")
+
+    def validate_block(self):
+        """ Validates a block """
+        blocks = Ledger.get_blocks()
+        Ledger.show_ledger()
+
+        last_block = None
+
+        verified_block_status = block_status.get("VERIFIED")
+        if not last_block or last_block.status == verified_block_status or last_block.miner.username == self.username:
+            return
+
+        if last_block.is_valid():
+            last_block.valid_flags += 1
+        else:
+            last_block.invalid_flags += 1
+
+        if last_block.valid_flags == 3:
+            last_block.status = verified_block_status
+            miners_reward = 50.0
+            System.grant_reward(last_block.miner, (miners_reward + last_block.total_transaction_fee))
+        elif last_block.invalid_flags == 3:
+            # Return transactions to pool
+            for transaction in last_block.data:
+                TransactionPool.add_transaction(transaction)
+            # Remove block from ledger
+            Ledger.remove_block(last_block)
+
+        last_block.validated_by.append(self.username)
+        Ledger.update_block(last_block)
+        print("You successfully validated this block")
 
     def send_coins(self):
         """ Creates a transaction for a coin transfer to a given node (chosen by username) """
@@ -354,9 +425,8 @@ class Node:
 
     def __get_recipient_node_by_username(self):
         """ Returns a node chosen by the user to send coins to """
-        database = Database()
         recipient_username = input("Username -> ").strip()
-        recipient_node = database.get_node_by_username(recipient_username)
+        recipient_node = self.database.get_node_by_username(recipient_username)
         if recipient_node and recipient_node[0] != self.username:
             return recipient_node
         else:

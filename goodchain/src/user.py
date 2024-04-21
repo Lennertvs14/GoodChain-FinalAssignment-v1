@@ -93,7 +93,7 @@ class User:
 
     def __create_node_from_entity(self, node_entity):
         """ Create a Node object from a node entity """
-        return Node(node_entity[0], node_entity[1], node_entity[2], node_entity[3])
+        return Node(node_entity[0], node_entity[1], node_entity[2], node_entity[3], show_notifications=True)
 
     def __create_node(self):
         """" Returns a node object based on user input """
