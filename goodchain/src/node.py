@@ -166,8 +166,8 @@ class Node:
                     self.show_profile()
                 case 2:
                     self.ui.clear_console()
-                    print("Explore the blockchain")
-                    Ledger.show_ledger()
+                    Ledger.show_menu()
+                    Ledger.handle_menu_input()
                 case 3:
                     self.ui.clear_console()
                     print("Check balance")
@@ -284,7 +284,8 @@ class Node:
         blocks = Ledger.get_blocks()
         Ledger.show_ledger()
 
-        chosen_block_id = input("Enter the ID of the block you'd like to validate:").strip()
+        chosen_block_id = input("Enter 'back' to go back.\n"
+                                "Enter the ID of the block you'd like to validate:").strip()
         try:
             chosen_block_id = int(chosen_block_id)
             if 0 <= chosen_block_id < len(blocks):
@@ -322,6 +323,8 @@ class Node:
             else:
                 print("Invalid id, please try again.")
         except ValueError:
+            if chosen_block_id == 'back':
+                return
             print("Invalid id, please try again.")
 
     def send_coins(self):

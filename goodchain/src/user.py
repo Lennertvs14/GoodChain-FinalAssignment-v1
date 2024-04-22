@@ -44,8 +44,8 @@ class User:
                     return self.login()
                 case 2:
                     self.ui.clear_console()
-                    print("Explore the blockchain")
-                    Ledger.show_ledger()
+                    Ledger.show_menu()
+                    Ledger.handle_menu_input()
                 case 3:
                     self.ui.clear_console()
                     print("Sign up")
