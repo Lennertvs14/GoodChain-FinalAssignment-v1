@@ -481,7 +481,7 @@ class Node:
                         print("Invalid id, please try again.")
                 except ValueError:
                     if transaction_id.lower() == "done":
-                        if len(chosen_transactions) > minimum_transactions:
+                        if len(chosen_transactions) >= minimum_transactions:
                             break
                         else:
                             print(f"You must chose at least {minimum_transactions-len(chosen_transactions)} "
