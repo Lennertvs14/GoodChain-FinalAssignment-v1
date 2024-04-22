@@ -284,31 +284,45 @@ class Node:
         blocks = Ledger.get_blocks()
         Ledger.show_ledger()
 
-        last_block = None
+        chosen_block_id = input("Enter the ID of the block you'd like to validate:").strip()
+        try:
+            chosen_block_id = int(chosen_block_id)
+            if 0 <= chosen_block_id < len(blocks):
+                chosen_block = blocks[chosen_block_id]
 
-        verified_block_status = block_status.get("VERIFIED")
-        if not last_block or last_block.status == verified_block_status or last_block.miner.username == self.username:
-            return
+                if chosen_block.miner.username == self.username:
+                    print("You cannot validate the block you mined yourself.")
+                    return
 
-        if last_block.is_valid():
-            last_block.valid_flags += 1
-        else:
-            last_block.invalid_flags += 1
+                validators = chosen_block.validated_by.split()
+                if self.username in validators:
+                    print("You have successfully validated this block.")
+                    return
 
-        if last_block.valid_flags == 3:
-            last_block.status = verified_block_status
-            miners_reward = 50.0
-            System.grant_reward(last_block.miner, (miners_reward + last_block.total_transaction_fee))
-        elif last_block.invalid_flags == 3:
-            # Return transactions to pool
-            for transaction in last_block.data:
-                TransactionPool.add_transaction(transaction)
-            # Remove block from ledger
-            Ledger.remove_block(last_block)
+                if chosen_block.is_valid():
+                    chosen_block.valid_flags += 1
+                else:
+                    chosen_block.invalid_flags += 1
 
-        last_block.validated_by += " " + self.username
-        Ledger.update_block(last_block)
-        print("You successfully validated this block")
+                verified_block_status = block_status.get("VERIFIED")
+                if chosen_block.valid_flags == 3:
+                    chosen_block.status = verified_block_status
+                    miners_reward = 50.0
+                    System.grant_reward(chosen_block.miner, (miners_reward + chosen_block.total_transaction_fee))
+                elif chosen_block.invalid_flags == 3:
+                    # Return transactions to pool
+                    for transaction in chosen_block.data:
+                        TransactionPool.add_transaction(transaction)
+                    # Remove block from ledger
+                    Ledger.remove_block(chosen_block)
+
+                chosen_block.validated_by += " " + self.username
+                Ledger.update_block(chosen_block)
+                print("You have successfully validated this block.")
+            else:
+                print("Invalid id, please try again.")
+        except ValueError:
+            print("Invalid id, please try again.")
 
     def send_coins(self):
         """ Creates a transaction for a coin transfer to a given node (chosen by username) """
