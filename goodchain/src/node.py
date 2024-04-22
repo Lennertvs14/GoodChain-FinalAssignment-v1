@@ -73,6 +73,31 @@ class Node:
         chain_length = len(current_blocks)
         print(f"GoodChain currently has {chain_length} block(s) in the ledger.")
 
+        # Show status of pending transactions and handle invalid transactions
+        transaction_pool = TransactionPool.get_transactions()
+        for transaction in transaction_pool:
+            if transaction.type != REWARD and transaction.input[0] == self.public_key:
+                if transaction.valid == False:
+                    print("The following transaction:")
+                    print(whitespace + f"{transaction}")
+                    print("is invalid and canceled!")
+                    TransactionPool.remove_transactions([transaction])
+                else:
+                    print("The following transaction:")
+                    print(whitespace + f"{transaction}")
+                    print("is still pending for arrival.")
+            elif transaction.output[0] == self.public_key:
+                if transaction.valid == False:
+                    print("The following transaction:")
+                    print(whitespace + f"{transaction}")
+                    print("is invalid and canceled!")
+                    TransactionPool.remove_transactions([transaction])
+                else:
+                    print("The following transaction:")
+                    print(whitespace + f"{transaction}")
+                    print("is still pending for arrival.")
+
+        # Get last login date
         last_login_date = self.database.get_last_login_date(self.username)
         if last_login_date is None:
             print("This is your first login, there's nothing more to show.")
