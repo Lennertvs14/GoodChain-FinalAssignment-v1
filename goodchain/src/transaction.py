@@ -48,7 +48,7 @@ class Transaction:
             # Validate input
             addr, amount = self.input
             # Do not allow a negative input amount
-            if amount < 0:
+            if amount < 0 or amount == 0:
                 return False
             # Validate signature
             if not signature.verify(message, self.signature, addr):
@@ -62,7 +62,7 @@ class Transaction:
 
             # Validate output
             addr, amount = self.output
-            if amount < 0:
+            if amount < 0 or amount == 0:
                 return False
             total_out = total_out + amount
 
