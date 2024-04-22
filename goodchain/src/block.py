@@ -1,7 +1,6 @@
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from datetime import datetime
-from uuid import uuid4
 from user_interface import whitespace
 
 
@@ -20,7 +19,7 @@ class Block:
     validated_by = ""
 
     def __init__(self, data, previous_block):
-        self.id = uuid4()
+        self.id = self.__get_unique_id()
         self.data = data
         self.block_hash = None
         self.previous_block = previous_block
@@ -46,6 +45,14 @@ class Block:
             return current_block_is_valid and previous_block_is_valid
         else:
             return current_block_is_valid
+
+    def __get_unique_id(self):
+        from ledger import Ledger
+        current_blocks = Ledger.get_blocks()
+        if current_blocks is not None and len(current_blocks) > 0:
+            return len(current_blocks)
+        else:
+            return 0
 
     def __repr__(self):
         result = ""
