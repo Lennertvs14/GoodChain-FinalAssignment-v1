@@ -48,8 +48,6 @@ class Ledger:
         except ValueError:
             print("Enter digits only.")
 
-        input("Press enter to continue.")
-
     @staticmethod
     def show_block_by_id():
         """ Prints a block by id"""
@@ -67,6 +65,8 @@ class Ledger:
                 if chosen_block_id == 'back':
                     return
                 print("Invalid id, please try again.")
+        else:
+            print("There are no blocks in our chain yet.")
 
     @staticmethod
     def add_block(block: TransactionBlock):
@@ -94,20 +94,20 @@ class Ledger:
             print("No blocks in the ledger.")
             return
 
-        current_part = 0
-        part_size = 3
+        current_page = 0
+        page_size = 2
+        total_pages = -(-len(all_blocks) // page_size)
 
         while True:
-            pages_length = len(all_blocks) // part_size + 1 if len(all_blocks) % part_size != 0 else len(all_blocks) // part_size
+            print(f"\nPage {current_page + 1} of {total_pages}\n")
 
-            print(f"Part {current_part + 1} of {pages_length}\n")
+            start_index = current_page * page_size
+            end_index = start_index + page_size
+            blocks_on_current_page = all_blocks[start_index:end_index]
 
-            for i in range(current_part * part_size, current_part * part_size + part_size):
-                if i < len(all_blocks):
-                    print(whitespace + f"{all_blocks[i]}")
-                    print()
-                else:
-                    break
+            for block in blocks_on_current_page:
+                print(whitespace + f"{block}")
+                print()
 
             print("1 - Next page")
             print("2 - Previous page")
@@ -115,12 +115,10 @@ class Ledger:
 
             choice = input("-> ")
 
-            if choice == "1":
-                if current_part < pages_length - 1:
-                    current_part += 1
-            elif choice == "2":
-                if current_part > 0:
-                    current_part -= 1
+            if choice == "1" and current_page < total_pages - 1:
+                current_page += 1
+            elif choice == "2" and current_page > 0:
+                current_page -= 1
             elif choice == "3":
                 break
             else:

@@ -46,6 +46,7 @@ class User:
                     self.ui.clear_console()
                     Ledger.show_menu()
                     Ledger.handle_menu_input()
+                    input("Press enter to continue.")
                 case 3:
                     self.ui.clear_console()
                     print("Sign up")
