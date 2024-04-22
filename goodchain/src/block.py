@@ -61,7 +61,7 @@ class Block:
         result += whitespace + fr"Block hash value: {str(self.block_hash)}" + "\n"
 
         if self.previous_block:
-            result += whitespace + fr"Previous block hash value: {str(self.previous_block_hash, encoding='utf-8')}" + "\n"
+            result += whitespace + fr"Previous block hash value: {str(self.previous_block_hash)}" + "\n"
 
         result += whitespace + "Data:\n"
         for t in self.data:
