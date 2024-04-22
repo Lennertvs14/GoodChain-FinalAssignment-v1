@@ -78,54 +78,65 @@ class Node:
         for transaction in transaction_pool:
             if transaction.type != REWARD and transaction.input[0] == self.public_key:
                 if transaction.valid == False:
-                    print("The following transaction:")
+                    print("\nYour following transaction:")
                     print(whitespace + f"{transaction}")
-                    print("is invalid and canceled!")
+                    print("is considered invalid and canceled!")
                     TransactionPool.remove_transactions([transaction])
                 else:
-                    print("The following transaction:")
+                    print("\nYour following transaction:")
                     print(whitespace + f"{transaction}")
-                    print("is still pending for arrival.")
-            elif transaction.output[0] == self.public_key:
-                if transaction.valid == False:
-                    print("The following transaction:")
+                    print("is still pending for withdrawal.")
+            elif transaction.output[0] == self.public_key and transaction.valid == True:
+                    print("\nThe following transaction:")
                     print(whitespace + f"{transaction}")
-                    print("is invalid and canceled!")
-                    TransactionPool.remove_transactions([transaction])
-                else:
-                    print("The following transaction:")
-                    print(whitespace + f"{transaction}")
-                    print("is still pending for arrival.")
+                    print("is pending for arrival.")
 
         # Get last login date
         last_login_date = self.database.get_last_login_date(self.username)
         if last_login_date is None:
-            print("This is your first login, there's nothing more to show.")
-            input("Press enter to continue.")
-            self.database.update_last_login_date(self.username)
-            return
+            print("\nThis is your first login!")
+        else:
+            # Parse the date and time
+            last_login_date = datetime.strptime(last_login_date, "%Y-%m-%d %H:%M:%S")
+            print(f"\nYour last login was at {last_login_date.date()}.")
 
-        # Parse the date and time
-        last_login_date = datetime.strptime(last_login_date, "%Y-%m-%d %H:%M:%S")
-        print(f"Your last login was at {last_login_date.date()}.")
-        self.database.update_last_login_date(self.username)
-
-        print("These are new blocks added to our chain:")
+        print("\nThese are the new blocks added to our chain:")
         new_blocks = []
         for block in current_blocks:
-            if block.creation_date > last_login_date:
+            if last_login_date is None or block.creation_date > last_login_date:
                 new_blocks.append(block)
-                print(whitespace + f"{block}")
+                print(whitespace + f"#{block.id}")
 
-        print()
+        # Update last login date
+        self.database.update_last_login_date(self.username)
 
         for block in new_blocks:
-            if block.miner == self.username:
-                print(f"The block #{block.id} which you mined is {block.status}")
+            if block.miner.username == self.username:
+                print(f"\nThe block #{block.id} which you mined is {block.status}")
 
-        input("Press enter to continue.")
+        for block in new_blocks:
+            for transaction in block.data:
+                if transaction.type != REWARD and transaction.input[0] == self.public_key:
+                    if block.status == block_status.get("VERIFIED"):
+                        print("\nYour following transaction:")
+                        print(whitespace + f"{transaction}")
+                        print("is transferred successfully.")
+                    else:
+                        print("\nYour following transaction:")
+                        print(whitespace + f"{transaction}")
+                        print("is still pending for arrival.")
+                elif transaction.output[0] == self.public_key:
+                    if block.status == block_status.get("VERIFIED"):
+                        print("\nYou have received the following transaction:")
+                        print(whitespace + f"{transaction}")
+                        print("successfully.")
+                    else:
+                        print("\nThe following transaction:")
+                        print(whitespace + f"{transaction}")
+                        print("is pending for arrival.")
+
+        input("\nPress enter to continue.")
         return
-
 
     def show_menu(self):
         """ Shows the private menu """
