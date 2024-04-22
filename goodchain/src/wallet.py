@@ -1,6 +1,7 @@
+from block import block_status
 from ledger import Ledger
-from transaction_pool import TransactionPool
 from transaction import REWARD
+from transaction_pool import TransactionPool
 from user_interface import whitespace
 
 
@@ -65,19 +66,12 @@ class Wallet:
         incoming = 0.0
         outgoing = 0.0
         for block in Ledger.get_blocks():
-            for transaction in block.data: # processed transactions list
-                receiver_public_key = transaction.output[0]
-                if receiver_public_key == self.owner.public_key:
-                    incoming += transaction.output[1]
-                elif transaction.type != REWARD and transaction.input[0] == self.owner.public_key:
-                    outgoing += transaction.input[1]
-
-        pending_transactions = TransactionPool.get_transactions()
-        for transaction in pending_transactions:
-            receiver_public_key = transaction.output[0]
-            if transaction.type == REWARD and receiver_public_key == self.owner.public_key:
-                incoming += transaction.output[1]
-            elif transaction.type != REWARD and transaction.input[0] == self.owner.public_key:
-                outgoing += transaction.input[1]
+            if block.status == block_status.get("VERIFIED"):
+                for transaction in block.data: # processed transactions list
+                    receiver_public_key = transaction.output[0]
+                    if receiver_public_key == self.owner.public_key:
+                        incoming += transaction.output[1]
+                    elif transaction.type != REWARD and transaction.input[0] == self.owner.public_key:
+                        outgoing += transaction.input[1]
 
         return incoming - outgoing
