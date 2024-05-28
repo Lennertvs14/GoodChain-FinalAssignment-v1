@@ -65,6 +65,14 @@ class Wallet:
         """ Returns the available balance """
         incoming = 0.0
         outgoing = 0.0
+
+        # Check pending transactions
+        pending_transactions = TransactionPool.get_transactions()
+        for transaction in pending_transactions:
+            if transaction.type != REWARD and transaction.input[0] == self.owner.public_key:
+                outgoing += transaction.input[1]
+
+        # Check processed transactions
         for block in Ledger.get_blocks():
             if block.status == block_status.get("VERIFIED"):
                 for transaction in block.data: # processed transactions list
