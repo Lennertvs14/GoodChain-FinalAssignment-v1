@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from transaction_block import TransactionBlock
 
@@ -9,6 +10,7 @@ class Database:
     """ Perform queries on the node database """
     def __init__(self):
         self.database = '../data/database.db'
+        os.makedirs(os.path.dirname(self.database), exist_ok=True)
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
         self.initialize_database()
