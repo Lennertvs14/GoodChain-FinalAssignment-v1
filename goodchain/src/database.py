@@ -1,6 +1,5 @@
 import os
 import sqlite3
-from transaction_block import TransactionBlock
 
 
 path = "../data/database.db"
