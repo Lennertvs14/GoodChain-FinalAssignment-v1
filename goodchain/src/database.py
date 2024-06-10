@@ -1,4 +1,5 @@
 import os
+from socket import gethostbyname
 import sqlite3
 
 
@@ -13,6 +14,7 @@ class Database:
         self.connection = sqlite3.connect(self.database)
         self.cursor = self.connection.cursor()
         self.initialize_database()
+        self.add_user_ip_address()
 
     def handle_connection(func):
         def wrapper(self, *args, **kwargs):
@@ -35,6 +37,23 @@ class Database:
                 LastLogin DATETIME
             )"""
         )
+        # Ensure User table exists
+        self.cursor.execute(
+            """ CREATE TABLE IF NOT EXISTS User (
+                Address text
+            )"""
+        )
+
+    @handle_connection
+    def add_user_ip_address(self):
+        """ Adds the user's ip address if it doesn't exist already """
+        # Get your IP address
+        address = gethostbyname('localhost')
+        # Check if it already is in the db
+        self.cursor.execute("SELECT Address FROM User WHERE Address = address", {'address': address})
+        is_known_ip_address = self.cursor.fetchone() is not None
+        if not is_known_ip_address:
+            self.cursor.execute("INSERT INTO User (Address) VALUES (?)", (address,))
 
     @handle_connection
     def insert_node(self, node):
