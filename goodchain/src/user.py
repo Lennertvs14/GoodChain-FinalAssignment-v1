@@ -1,5 +1,6 @@
 from database import Database
 from ledger import Ledger
+import ledger_server
 from node import Node
 import re
 from system import System
@@ -31,6 +32,7 @@ class User:
 
     def __init__(self):
         self.database = Database()
+        ledger_server.start()
 
     def handle_menu_user_input(self):
         """ Handles user input for the public menu interface """
@@ -52,6 +54,7 @@ class User:
                     print("Sign up")
                     self.registrate()
                 case 4:
+                    ledger_server.stop()
                     System().exit()
                 case _:
                     raise ValueError("Invalid choice.")
