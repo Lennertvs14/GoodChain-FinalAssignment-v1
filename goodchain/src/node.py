@@ -4,6 +4,7 @@ from cryptography.hazmat.primitives import serialization
 from database import Database
 from datetime import datetime, timedelta
 from ledger import Ledger
+from ledger_client import LedgerClient
 from system import System
 from transaction import Transaction, REWARD
 from transaction_pool import TransactionPool
@@ -29,6 +30,7 @@ class Node:
         else:
             self.private_key, self.public_key = self.__generate_serialized_keys()
         self.wallet = Wallet(self)
+        self.ledger_client = LedgerClient(self.username, self.database)
         self.validate_last_block()
         if show_notifications:
             self.show_notifications()
@@ -234,7 +236,9 @@ class Node:
         chosen_transactions = self.__get_transactions_to_mine(maximum_transactions)
 
         # Get confirmation
-        input("Press enter if you wish to proceed or exit the app.")
+        input("Press enter if you wish to proceed, otherwise exit the app.")
+
+        new_block = None
         try:
             valid_transactions = []
             invalid_transactions = []
@@ -276,8 +280,10 @@ class Node:
 
                 if len(invalid_transactions) > 0:
                     TransactionPool.flag_invalid_transactions(invalid_transactions)
-        except:
+        except Exception as ex:
             print("Something went wrong, please try again.")
+        finally:
+            self.ledger_client.broadcast_ledger_change(new_block)
 
     def validate_block(self):
         """ Validates a block """

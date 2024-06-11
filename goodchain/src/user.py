@@ -123,7 +123,7 @@ class User:
             return self.__create_node()
 
         input("Are you sure you want to proceed signing up with the information above?\n"
-              "Press enter if you wish to proceed or exit the app.")
+              "Press enter if you wish to proceed, otherwise exit the app.")
 
         # Get hash value of password to store to avoid storing the actual password in our database
         password_hash = self.get_password_hash_value(password)
