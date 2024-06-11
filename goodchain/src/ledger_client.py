@@ -10,8 +10,7 @@ DATA_FORMAT = 'utf-8'
 class LedgerClient:
     def __init__(self, node_username: str, database):
         self.node_username = node_username
-        self.network_peers = database.get_network_peers(socket.gethostbyname('localhost'))
-        print(self.network_peers)
+        self.network_peers = database.get_network_peers(socket.gethostbyname(socket.gethostname()))
 
     def broadcast_ledger_change(self, new_block: TransactionBlock):
         for peer in self.network_peers:

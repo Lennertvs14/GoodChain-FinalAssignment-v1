@@ -3,7 +3,7 @@ import socket
 from threading import Thread
 
 
-HOST = socket.gethostbyname('localhost')
+HOST = socket.gethostbyname(socket.gethostname())
 PORT = 5050
 HEADER_SIZE = 64
 DATA_FORMAT = 'utf-8'

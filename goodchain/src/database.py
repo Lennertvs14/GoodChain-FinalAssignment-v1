@@ -1,5 +1,5 @@
 import os
-from socket import gethostbyname
+from socket import gethostbyname, gethostname
 import sqlite3
 
 
@@ -48,7 +48,7 @@ class Database:
     def add_user_ip_address(self):
         """ Adds the user's ip address if it doesn't exist already """
         # Get your IP address
-        address = gethostbyname('localhost')
+        address = gethostbyname(gethostname())
         # Check if it already is in the db
         self.cursor.execute("SELECT Address FROM User WHERE Address = address", {'address': address})
         is_known_ip_address = self.cursor.fetchone() is not None
