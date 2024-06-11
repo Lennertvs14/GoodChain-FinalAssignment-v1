@@ -70,6 +70,12 @@ class Database:
                 """, node_dict)
 
     @handle_connection
+    def get_network_peers(self, own_ip_address):
+        """ Returns a list of the network peers """
+        self.cursor.execute("SELECT DISTINCT Address FROM User WHERE Address != ?", (own_ip_address,))
+        return self.cursor.fetchall()
+
+    @handle_connection
     def get_node_by_username(self, username: str):
         """ Returns a node by username """
         self.cursor.execute("SELECT * FROM Node WHERE Username = :username", {'username': username})
