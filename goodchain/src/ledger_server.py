@@ -1,3 +1,5 @@
+from ledger import Ledger
+import pickle
 import select
 import socket
 from threading import Thread
@@ -21,10 +23,13 @@ def handle_client(connection):
                     break
                 data_length = int(header.strip())
                 if data_length > 0:
-                    data = connection.recv(data_length).decode(DATA_FORMAT)
-                    if data:
-                        # TODO: Update ledger by client data (if it's valid)
-                        print(f"Received new block:\n{data}")
+                    new_block = connection.recv(data_length)
+                    if new_block:
+                        # Deserialize
+                        new_block = pickle.loads(new_block)
+                        # Add new block to ledger
+                        if new_block.block_hash:
+                            Ledger.add_block(new_block)
                     break
     finally:
         # Client is handled
