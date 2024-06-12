@@ -1,22 +1,16 @@
 import select
 import socket
 from threading import Thread
+from time import sleep, time
 
 
-HOST = socket.gethostbyname(socket.gethostname())
-PORT = 5050
 HEADER_SIZE = 64
 DATA_FORMAT = 'utf-8'
-DISCONNECTION_MESSAGE = ':Q'
 DEFAULT_BUFFER_SIZE = 1024
-
-server_is_running = False
 
 
 def handle_client(connection):
     try:
-        # Get client info
-        client_user_name = connection.recv(DEFAULT_BUFFER_SIZE).decode(DATA_FORMAT)
         while True:
             # Initialize buffer
             read_buffer, _, _ = select.select([connection], [], [])
@@ -37,35 +31,52 @@ def handle_client(connection):
         connection.close()
 
 
-def start():
-    # Start ledger server with new thread to avoid blocking the main thread
-    server_thread = Thread(target=listen, daemon=True)
-    server_thread.start()
+class LedgerServer:
+    owner = None
 
+    def __init__(self):
+        self.host = socket.gethostbyname(socket.gethostname())
+        self.port = 5050
+        self.server_is_running = False
+        self.available_port_is_found = False
 
-def listen():
-    global server_is_running
-    # Find an available port, start with 5050
-    try:
-        # Create a new socket using the AF_INET address family (IPv4) and SOCK_STREAM socket type (TCP)
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
-            # Try to bind socket to current port
-            server_socket.bind((HOST, PORT))
-            # Successful bind
-            # Start listening
-            server_socket.listen()
-            server_is_running = True
-            while server_is_running:
-                # Client established connection, accept and handle it
-                conn, addr = server_socket.accept()
-                thread = Thread(target=handle_client, args=(conn, ))
-                thread.start()
-    except socket.error:
-        # Binding failed, so current port is unavailable
-        pass # -> server is already listening on this machine
+    def start_server(self):
+        # Start ledger server with new thread to avoid blocking the main thread
+        server_thread = Thread(target=self.listen, daemon=True)
+        server_thread.start()
+        start_time = time()
 
+        # Wait until an available port is found
+        while self.available_port_is_found is False:
+            # Check if we've been waiting for more than 1 minute
+            if time() - start_time > 60:
+                raise Exception("Timeout: Could not find an available port.")
+            sleep(0.1)
 
-def stop():
-    global server_is_running
-    # Stop the running server
-    server_is_running = False
+        print(f"Server is listening on {self.port}")
+
+    def listen(self):
+        # Find an available port
+        while self.available_port_is_found is False:
+            try:
+                # Create a new socket using the AF_INET address family (IPv4) and SOCK_STREAM socket type (TCP)
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
+                    # Try to bind socket to current port
+                    server_socket.bind((self.host, self.port))
+                    # Successful bind
+                    self.available_port_is_found = True
+                    # Start listening
+                    server_socket.listen()
+                    self.server_is_running = True
+                    while self.server_is_running:
+                        # Client established connection, accept and handle it
+                        conn, addr = server_socket.accept()
+                        thread = Thread(target=handle_client, args=(conn,))
+                        thread.start()
+            except socket.error:
+                # Binding failed, so current port is unavailable
+                self.port += 1
+
+    def stop_server(self):
+        # Stop the running server
+        self.server_is_running = False

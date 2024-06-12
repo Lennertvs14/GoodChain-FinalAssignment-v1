@@ -1,6 +1,6 @@
 from database import Database
 from ledger import Ledger
-import ledger_server
+from ledger_server import LedgerServer
 from node import Node
 import re
 from system import System
@@ -32,7 +32,10 @@ class User:
 
     def __init__(self):
         self.database = Database()
-        ledger_server.start()
+
+        self.ledger_server = LedgerServer()
+        self.ledger_server.start_server()
+        self.database.insert_ledger_server_port(self.ledger_server.port)
 
     def handle_menu_user_input(self):
         """ Handles user input for the public menu interface """
@@ -54,7 +57,7 @@ class User:
                     print("Sign up")
                     self.registrate()
                 case 4:
-                    ledger_server.stop()
+                    self.ledger_server.stop_server()
                     System().exit()
                 case _:
                     raise ValueError("Invalid choice.")
@@ -88,7 +91,7 @@ class User:
                 expected_password_hash = node_entity[1]
                 if entered_password_hash == expected_password_hash:
                     # Login attempt successful, now return the corresponding node object
-                    return self.__create_node_from_entity(node_entity)
+                    return self.__convert_node_entity_to_instance(node_entity)
 
             # Login attempt unsuccessful
             remaining_attempts = (max_amount_of_attempts - attempts) - 1
@@ -98,9 +101,11 @@ class User:
         # User tried too many times
         System().exit()
 
-    def __create_node_from_entity(self, node_entity):
-        """ Create a Node object from a node entity """
-        return Node(node_entity[0], node_entity[1], node_entity[2], node_entity[3], show_notifications=True)
+    def __convert_node_entity_to_instance(self, node_entity):
+        """ Create a Node instance from a node entity """
+        return (
+            Node(node_entity[0], node_entity[1], self.ledger_server, node_entity[2], node_entity[3], True)
+        )
 
     def __create_node(self):
         """" Returns a node object based on user input """
@@ -129,7 +134,7 @@ class User:
         password_hash = self.get_password_hash_value(password)
 
         # Create and return node
-        return Node(username, password_hash)
+        return Node(username, password_hash, self.ledger_server)
 
     def __validate_username(self, username):
         # Empty check

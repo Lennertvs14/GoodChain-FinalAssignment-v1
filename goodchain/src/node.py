@@ -21,7 +21,7 @@ class Node:
     ui = UserInterface()
     database = Database()
 
-    def __init__(self, username, password_hash, public_key=None, private_key=None, show_notifications=False):
+    def __init__(self, username, password_hash, ledger_server, public_key=None, private_key=None, show_notifications=False):
         self.username = username
         self.password_hash = password_hash
         if public_key and private_key:
@@ -29,8 +29,10 @@ class Node:
             self.private_key = private_key
         else:
             self.private_key, self.public_key = self.__generate_serialized_keys()
+        self.ledger_server = ledger_server
+
         self.wallet = Wallet(self)
-        self.ledger_client = LedgerClient(self.username, self.database)
+        self.ledger_client = LedgerClient(self.ledger_server.port)
         self.validate_last_block()
         if show_notifications:
             self.show_notifications()
@@ -283,6 +285,7 @@ class Node:
         except Exception as ex:
             print("Something went wrong, please try again.")
         finally:
+            print("BROADCAST.")
             self.ledger_client.broadcast_ledger_change(new_block)
 
     def validate_block(self):

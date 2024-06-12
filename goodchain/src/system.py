@@ -1,4 +1,4 @@
-from database import path as database_path
+from database import PATH as database_path
 from hashlib import sha256
 from ledger import path as ledger_path
 from transaction import Transaction, REWARD
