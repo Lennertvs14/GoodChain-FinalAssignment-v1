@@ -1,20 +1,17 @@
 import os
-from socket import gethostbyname, gethostname
 import sqlite3
 
 
-path = "../data/database.db"
+PATH = "../data/database.db"
 
 
 class Database:
     """ Perform queries on the node database """
     def __init__(self):
-        self.database = '../data/database.db'
-        os.makedirs(os.path.dirname(self.database), exist_ok=True)
-        self.connection = sqlite3.connect(self.database)
+        os.makedirs(os.path.dirname(PATH), exist_ok=True)
+        self.connection = sqlite3.connect(PATH, isolation_level=None)
         self.cursor = self.connection.cursor()
         self.initialize_database()
-        self.add_user_ip_address()
 
     def handle_connection(func):
         def wrapper(self, *args, **kwargs):
@@ -37,23 +34,40 @@ class Database:
                 LastLogin DATETIME
             )"""
         )
-        # Ensure User table exists
+        # Ensure LedgerServer table exists
         self.cursor.execute(
-            """ CREATE TABLE IF NOT EXISTS User (
-                Address text
+            """ CREATE TABLE IF NOT EXISTS LedgerServer (
+                Port text
+            )"""
+        )
+        # Ensure TransactionPoolServer table exists
+        self.cursor.execute(
+            """ CREATE TABLE IF NOT EXISTS TransactionPoolServer (
+                Port text
             )"""
         )
 
     @handle_connection
-    def add_user_ip_address(self):
-        """ Adds the user's ip address if it doesn't exist already """
-        # Get your IP address
-        address = gethostbyname(gethostname())
-        # Check if it already is in the db
-        self.cursor.execute("SELECT Address FROM User WHERE Address = address", {'address': address})
-        is_known_ip_address = self.cursor.fetchone() is not None
-        if not is_known_ip_address:
-            self.cursor.execute("INSERT INTO User (Address) VALUES (?)", (address,))
+    def get_ledger_servers(self):
+        """ Returns a list of ledger servers their port numbers"""
+        self.cursor.execute("SELECT DISTINCT * FROM LedgerServer")
+        return self.cursor.fetchone()
+
+    @handle_connection
+    def insert_ledger_server_port(self, port):
+        """ Inserts a ledger server port into the database if it does not exist already """
+        self.cursor.execute(
+            """ INSERT OR IGNORE INTO LedgerServer (Port)
+                VALUES (?)
+                """, (port,)
+        )
+
+    @handle_connection
+    def remove_ledger_server_port(self, port):
+        """ Removes a ledger server port from the database if it exists """
+        self.cursor.execute(
+            """ DELETE FROM LedgerServer WHERE Port = ? """, (port,)
+        )
 
     @handle_connection
     def insert_node(self, node):
@@ -68,12 +82,6 @@ class Database:
             """ INSERT INTO Node (Username, PasswordHash, PublicKey, PrivateKey)
                 VALUES (:username, :password_hash, :public_key, :private_key)
                 """, node_dict)
-
-    @handle_connection
-    def get_network_peers(self, own_ip_address):
-        """ Returns a list of the network peers """
-        self.cursor.execute("SELECT DISTINCT Address FROM User WHERE Address != ?", (own_ip_address,))
-        return self.cursor.fetchall()
 
     @handle_connection
     def get_node_by_username(self, username: str):
