@@ -2,7 +2,7 @@ import os
 import sqlite3
 
 
-PATH = r"../../../../Users/lenne/desktop/database.db"
+PATH = r'D:\GoodchainDatabase\database.db'
 
 
 class Database:
