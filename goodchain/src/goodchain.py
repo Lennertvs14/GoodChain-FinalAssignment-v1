@@ -4,7 +4,7 @@ from system import System
 
 
 ui = UserInterface()
-user = User()
+user = None
 
 
 def run_goodchain_app(node=None):
@@ -27,4 +27,5 @@ def run_goodchain_app(node=None):
 if __name__ == "__main__":
     system = System()
     if system.is_data_integrity_preserved():
+        user = User()
         run_goodchain_app()
