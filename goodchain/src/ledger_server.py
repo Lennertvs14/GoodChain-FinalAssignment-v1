@@ -58,8 +58,6 @@ class LedgerServer:
                 raise Exception("Timeout: Could not find an available port.")
             sleep(0.1)
 
-        print(f"Server is listening on {self.port}")
-
     def listen(self):
         # Find an available port
         while self.available_port_is_found is False:

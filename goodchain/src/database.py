@@ -2,7 +2,7 @@ import os
 import sqlite3
 
 
-PATH = "../data/database.db"
+PATH = r"../../../../Users/lenne/desktop/database.db"
 
 
 class Database:
