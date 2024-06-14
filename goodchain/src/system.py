@@ -1,4 +1,3 @@
-from database import PATH as database_path
 from hashlib import sha256
 from ledger import path as ledger_path
 from transaction import Transaction, REWARD
@@ -65,10 +64,6 @@ class System:
 
     def __compute_hash(self):
         digest = sha256()
-
-        database = self.__get_file_data(database_path)
-        if database is not None:
-            digest.update(database)
 
         ledger = self.__get_file_data(ledger_path)
         if ledger is not None:
