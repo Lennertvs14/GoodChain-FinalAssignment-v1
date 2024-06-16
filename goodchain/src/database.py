@@ -9,7 +9,7 @@ class Database:
     """ Perform queries on the node database """
     def __init__(self):
         os.makedirs(os.path.dirname(PATH), exist_ok=True)
-        self.connection = sqlite3.connect(PATH, isolation_level=None)
+        self.connection = sqlite3.connect(PATH, isolation_level='IMMEDIATE')
         self.cursor = self.connection.cursor()
         self.initialize_database()
 
@@ -60,13 +60,6 @@ class Database:
             """ INSERT OR IGNORE INTO LedgerServer (Port)
                 VALUES (?)
                 """, (port,)
-        )
-
-    @handle_connection
-    def remove_ledger_server_port(self, port):
-        """ Removes a ledger server port from the database if it exists """
-        self.cursor.execute(
-            """ DELETE FROM LedgerServer WHERE Port = ? """, (port,)
         )
 
     @handle_connection

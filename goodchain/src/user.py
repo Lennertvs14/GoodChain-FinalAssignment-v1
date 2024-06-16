@@ -58,7 +58,6 @@ class User:
                     self.registrate()
                 case 4:
                     self.ledger_server.stop_server()
-                    self.database.remove_ledger_server_port(self.ledger_server.port)
                     System().exit()
                 case _:
                     raise ValueError("Invalid choice.")

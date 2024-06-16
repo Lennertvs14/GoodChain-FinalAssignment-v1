@@ -285,7 +285,6 @@ class Node:
         except Exception as ex:
             print("Something went wrong, please try again.")
         finally:
-            print("BROADCAST.")
             self.ledger_client.broadcast_ledger_change(new_block)
 
     def validate_block(self):
