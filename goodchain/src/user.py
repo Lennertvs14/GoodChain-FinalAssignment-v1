@@ -35,7 +35,7 @@ class User:
 
         self.ledger_server = LedgerServer()
         self.ledger_server.start_server()
-        self.database.insert_ledger_server_port(self.ledger_server.port)
+        self.database.insert_ledger_server(self.ledger_server.port)
 
     def handle_menu_user_input(self):
         """ Handles user input for the public menu interface """

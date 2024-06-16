@@ -49,13 +49,13 @@ class Database:
 
     @handle_connection
     def get_ledger_servers(self):
-        """ Returns a list of ledger servers their port numbers"""
+        """ Returns a list of ledger servers """
         self.cursor.execute("SELECT DISTINCT * FROM LedgerServer")
         return self.cursor.fetchall()
 
     @handle_connection
-    def insert_ledger_server_port(self, port):
-        """ Inserts a ledger server port into the database if it does not exist already """
+    def insert_ledger_server(self, port):
+        """ Inserts a ledger server into the database if it does not exist already """
         self.cursor.execute(
             """ INSERT OR IGNORE INTO LedgerServer (Port)
                 VALUES (?)

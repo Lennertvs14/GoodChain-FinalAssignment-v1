@@ -13,8 +13,8 @@ class LedgerClient:
         self.corresponding_server_port = corresponding_server_port
 
     def broadcast_ledger_change(self, new_block: TransactionBlock):
-        for server_port_tuple in self.database.get_ledger_servers():
-            server_port = server_port_tuple[0]
+        for server in self.database.get_ledger_servers():
+            server_port = server[0]
             # We do not need to broadcast the new block to ourselves
             if str(server_port) != str(self.corresponding_server_port):
                 try:
