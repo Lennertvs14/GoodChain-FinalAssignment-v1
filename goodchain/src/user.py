@@ -32,7 +32,6 @@ class User:
 
     def __init__(self):
         self.database = Database()
-
         self.ledger_server = LedgerServer()
         self.ledger_server.start_server()
         self.database.insert_ledger_server(self.ledger_server.port)
@@ -68,11 +67,10 @@ class User:
         """ Registrates a new node """
         print("Write 'back' to go back.")
         node = self.__create_node()
-        if node is None:
-            return
-        self.database.insert_node(node)
-        sign_up_reward = 50.0
-        System.grant_reward(node, sign_up_reward)
+        if node:
+            self.database.insert_node(node)
+            sign_up_reward = 50.0
+            System.grant_reward(node, sign_up_reward)
 
     def login(self):
         """" Returns a node upon a successful login attempt """

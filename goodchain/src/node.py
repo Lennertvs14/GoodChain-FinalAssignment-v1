@@ -5,6 +5,7 @@ from database import Database
 from datetime import datetime, timedelta
 from ledger import Ledger
 from ledger_client import LedgerClient
+from ledger_server import DATA_TYPE
 from system import System
 from transaction import Transaction, REWARD
 from transaction_pool import TransactionPool
@@ -13,7 +14,8 @@ from user_interface import UserInterface, whitespace
 from wallet import Wallet
 
 
-minimum_transactions = 5
+MINIMUM_TRANSACTIONS = 5
+VERIFIED_BLOCK_STATUS = block_status.get("VERIFIED")
 
 
 class Node:
@@ -33,40 +35,43 @@ class Node:
 
         self.wallet = Wallet(self)
         self.ledger_client = LedgerClient(self.ledger_server.port)
-        self.validate_last_block()
+        self.check_last_block()
         if show_notifications:
             self.show_notifications()
 
-    def validate_last_block(self):
-        """ Validates the last block in the ledger if applicable """
+    def check_last_block(self):
+        """ Checks whether this user must validate the last block """
         last_block = Ledger.get_last_block()
 
-        verified_block_status = block_status.get("VERIFIED")
-        if not last_block or last_block.status == verified_block_status or last_block.miner.username == self.username:
+        if not last_block or last_block.status == VERIFIED_BLOCK_STATUS or last_block.miner.username == self.username:
             return
 
         validators = last_block.validated_by.split()
         if self.username in validators:
             return
 
-        if last_block.is_valid():
-            last_block.valid_flags += 1
-        else:
-            last_block.invalid_flags += 1
+        self.verify_block(last_block)
 
-        if last_block.valid_flags == 3:
-            last_block.status = verified_block_status
+    def verify_block(self, block: TransactionBlock):
+        """ Verifies the block by node's username """
+        if block.is_valid():
+            block.valid_flags += 1
+        else:
+            block.invalid_flags += 1
+
+        if block.valid_flags == 3:
+            block.status = VERIFIED_BLOCK_STATUS
             miners_reward = 50.0
-            System.grant_reward(last_block.miner, (miners_reward+last_block.total_transaction_fee))
-        elif last_block.invalid_flags == 3:
+            System.grant_reward(block.miner, (miners_reward + block.total_transaction_fee))
+        elif block.invalid_flags == 3:
             # Return transactions to pool
-            for transaction in last_block.data:
+            for transaction in block.data:
                 TransactionPool.add_transaction(transaction)
             # Remove block from ledger
-            Ledger.remove_block(last_block)
+            Ledger.remove_block(block)
 
-        last_block.validated_by += " " + self.username
-        Ledger.update_block(last_block)
+        block.validated_by += " " + self.username
+        Ledger.update_block(block)
 
     def show_notifications(self):
         """ Shows notifications """
@@ -285,7 +290,7 @@ class Node:
         except Exception as ex:
             print("Something went wrong, please try again.")
         finally:
-            self.ledger_client.broadcast_ledger_change(new_block)
+            self.ledger_client.broadcast_change(DATA_TYPE.get("NEW"), new_block)
 
     def validate_block(self):
         """ Validates a block """
@@ -308,25 +313,7 @@ class Node:
                     print("You have successfully validated this block.")
                     return
 
-                if chosen_block.is_valid():
-                    chosen_block.valid_flags += 1
-                else:
-                    chosen_block.invalid_flags += 1
-
-                verified_block_status = block_status.get("VERIFIED")
-                if chosen_block.valid_flags == 3:
-                    chosen_block.status = verified_block_status
-                    miners_reward = 50.0
-                    System.grant_reward(chosen_block.miner, (miners_reward + chosen_block.total_transaction_fee))
-                elif chosen_block.invalid_flags == 3:
-                    # Return transactions to pool
-                    for transaction in chosen_block.data:
-                        TransactionPool.add_transaction(transaction)
-                    # Remove block from ledger
-                    Ledger.remove_block(chosen_block)
-
-                chosen_block.validated_by += " " + self.username
-                Ledger.update_block(chosen_block)
+                self.verify_block(chosen_block)
                 print("You have successfully validated this block.")
             else:
                 print("Invalid id, please try again.")
@@ -421,9 +408,9 @@ class Node:
     def __validate_mining_conditions(self, transaction_pool, is_genesis_block):
         """ Validates if GoodChain's mining conditions are met """
         # Transaction pool validation
-        if 0 < len(transaction_pool) < minimum_transactions:
+        if 0 < len(transaction_pool) < MINIMUM_TRANSACTIONS:
             print(f"There are not enough transactions in the transaction pool, "
-                  f"there must be at least {minimum_transactions} transactions.")
+                  f"there must be at least {MINIMUM_TRANSACTIONS} transactions.")
             return False
 
         # Time interval validation
@@ -439,7 +426,7 @@ class Node:
             # Last block validation
             verified_block_status = block_status.get("VERIFIED")
             if last_block.status != verified_block_status:
-                print(f"You can not mine a new block until its considered valid.")
+                print(f"You can not mine a new block until the latest is considered valid.")
                 return False
 
         # All checks passed
@@ -489,10 +476,10 @@ class Node:
                         print("Invalid id, please try again.")
                 except ValueError:
                     if transaction_id.lower() == "done":
-                        if len(chosen_transactions) >= minimum_transactions:
+                        if len(chosen_transactions) >= MINIMUM_TRANSACTIONS:
                             break
                         else:
-                            print(f"You must chose at least {minimum_transactions-len(chosen_transactions)} "
+                            print(f"You must chose at least {MINIMUM_TRANSACTIONS - len(chosen_transactions)} "
                                   f"transaction(s) more.")
                     else:
                         print("Invalid id, please try again.")
