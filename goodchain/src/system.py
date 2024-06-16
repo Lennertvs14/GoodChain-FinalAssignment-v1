@@ -59,6 +59,8 @@ class System:
 
     def __set_system_hash(self, system_hash):
         """ Sets system hash to the data file """
+        import os
+        os.makedirs(os.path.dirname(system_hash_path), exist_ok=True)
         with open(system_hash_path, "wb") as file:
             file.write(bytes(system_hash, 'utf-8'))
 
