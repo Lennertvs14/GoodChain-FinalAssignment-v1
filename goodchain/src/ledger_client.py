@@ -15,7 +15,7 @@ class LedgerClient:
     def broadcast_ledger_change(self, new_block: TransactionBlock):
         for server_port in self.database.get_ledger_servers():
             # We do not need to broadcast the new block to ourselves
-            if server_port != self.corresponding_server_port:
+            if str(server_port) != str(self.corresponding_server_port):
                 try:
                     # Create a new socket for each connection
                     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -36,3 +36,5 @@ class LedgerClient:
                 except OSError as os_error:
                     # Connection to this server cannot be established.
                     print(f"Connection to this server {server_port} cannot be established.")
+                finally:
+                    s.close()
