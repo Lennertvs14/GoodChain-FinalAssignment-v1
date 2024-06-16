@@ -42,7 +42,7 @@ class Database:
         )
         # Ensure TransactionPoolServer table exists
         self.cursor.execute(
-            """ CREATE TABLE IF NOT EXISTS TransactionPoolServer (
+            """ CREATE TABLE IF NOT EXISTS TransactionServer (
                 Port text
             )"""
         )
@@ -58,6 +58,21 @@ class Database:
         """ Inserts a ledger server into the database if it does not exist already """
         self.cursor.execute(
             """ INSERT OR IGNORE INTO LedgerServer (Port)
+                VALUES (?)
+                """, (port,)
+        )
+
+    @handle_connection
+    def get_transaction_servers(self):
+        """ Returns a list of transaction servers """
+        self.cursor.execute("SELECT DISTINCT * FROM TransactionServer")
+        return self.cursor.fetchall()
+
+    @handle_connection
+    def insert_transaction_server(self, port):
+        """ Inserts a transaction server into the database if it does not exist already """
+        self.cursor.execute(
+            """ INSERT OR IGNORE INTO TransactionServer (Port)
                 VALUES (?)
                 """, (port,)
         )
