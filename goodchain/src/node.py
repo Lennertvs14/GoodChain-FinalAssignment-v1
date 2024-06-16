@@ -5,7 +5,7 @@ from database import Database
 from datetime import datetime, timedelta
 from ledger import Ledger
 from ledger_client import LedgerClient
-from ledger_server import DATA_TYPE
+from ledger_server import CRUD
 from system import System
 from transaction import Transaction, REWARD
 from transaction_pool import TransactionPool
@@ -69,9 +69,12 @@ class Node:
                 TransactionPool.add_transaction(transaction)
             # Remove block from ledger
             Ledger.remove_block(block)
+            self.ledger_client.broadcast_change(CRUD.get("DELETE"), block)
+            return
 
         block.validated_by += " " + self.username
         Ledger.update_block(block)
+        self.ledger_client.broadcast_change(CRUD.get("UPDATE"), block)
 
     def show_notifications(self):
         """ Shows notifications """
@@ -290,7 +293,7 @@ class Node:
         except Exception as ex:
             print("Something went wrong, please try again.")
         finally:
-            self.ledger_client.broadcast_change(DATA_TYPE.get("NEW"), new_block)
+            self.ledger_client.broadcast_change(CRUD.get("ADD"), new_block)
 
     def validate_block(self):
         """ Validates a block """

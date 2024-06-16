@@ -9,19 +9,29 @@ from time import sleep, time
 HEADER_SIZE = 64
 DATA_FORMAT = 'utf-8'
 DEFAULT_BUFFER_SIZE = 1024
-DATA_TYPE = {
-    "NEW_BLOCK": "NEW_BLOCK"
+CRUD = {
+    "ADD": "ADD",
+    "UPDATE": "UPDATE",
+    "DELETE": "DELETE"
 }
 
 
 def handle_client(connection):
     data = get_client_data(connection)
     data_type = data[0]
-    if data_type == DATA_TYPE.get("NEW_BLOCK"):
-        new_block = data[1]
+    if data_type == CRUD.get("ADD"):
         # Add new block to ledger
+        new_block = data[1]
         if new_block.block_hash:
             Ledger.add_block(new_block)
+    elif data_type == CRUD.get("UPDATE"):
+        # Update ledger
+        updated_block = data[1]
+        Ledger.update_block(updated_block)
+    elif data_type == CRUD.get("DELETE"):
+        # Remove block on ledger
+        obsolete_block = data[1]
+        Ledger.remove_block(obsolete_block)
 
 
 def get_client_data(connection):

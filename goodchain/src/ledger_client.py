@@ -1,5 +1,5 @@
 from database import Database
-from ledger_server import HEADER_SIZE, DATA_FORMAT, DATA_TYPE
+from ledger_server import HEADER_SIZE, DATA_FORMAT
 import pickle
 from transaction_block import TransactionBlock
 import socket
@@ -12,20 +12,20 @@ class LedgerClient:
         self.host = socket.gethostbyname(socket.gethostname())
         self.corresponding_server_port = corresponding_server_port
 
-    def broadcast_ledger_change(self, new_block: TransactionBlock):
+    def broadcast_change(self, data_type, block: TransactionBlock):
         for server in self.database.get_ledger_servers():
             server_port = server[0]
-            # We do not need to broadcast the new block to ourselves
+            # We do not need to broadcast to ourselves
             if str(server_port) != str(self.corresponding_server_port):
                 try:
                     # Create a new socket for each connection
                     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                         # Connect to peer address
                         s.connect((self.host, int(server_port)))
-                        # Send new block
-                        if new_block:
+                        # Send the block
+                        if block:
                             # Prepare data
-                            block_data = pickle.dumps((DATA_TYPE.get("NEW_BLOCK"), new_block))
+                            block_data = pickle.dumps((data_type, block))
                             data_length = len(block_data)
                             # Create header
                             header = str(data_length).encode(DATA_FORMAT)
