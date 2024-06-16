@@ -51,7 +51,7 @@ class Database:
     def get_ledger_servers(self):
         """ Returns a list of ledger servers their port numbers"""
         self.cursor.execute("SELECT DISTINCT * FROM LedgerServer")
-        return self.cursor.fetchone()
+        return self.cursor.fetchall()
 
     @handle_connection
     def insert_ledger_server_port(self, port):
