@@ -9,9 +9,23 @@ from time import sleep, time
 HEADER_SIZE = 64
 DATA_FORMAT = 'utf-8'
 DEFAULT_BUFFER_SIZE = 1024
+DATA_TYPE = {
+    "NEW_BLOCK": "NEW_BLOCK"
+}
 
 
 def handle_client(connection):
+    data = get_client_data(connection)
+    data_type = data[0]
+    if data_type == DATA_TYPE.get("NEW_BLOCK"):
+        new_block = data[1]
+        # Add new block to ledger
+        if new_block.block_hash:
+            Ledger.add_block(new_block)
+
+
+def get_client_data(connection):
+    data = None
     try:
         while True:
             # Initialize buffer
@@ -23,17 +37,12 @@ def handle_client(connection):
                     break
                 data_length = int(header.strip())
                 if data_length > 0:
-                    new_block = connection.recv(data_length)
-                    if new_block:
-                        # Deserialize
-                        new_block = pickle.loads(new_block)
-                        # Add new block to ledger
-                        if new_block.block_hash:
-                            Ledger.add_block(new_block)
+                    data = connection.recv(data_length)
                     break
     finally:
         # Client is handled
         connection.close()
+        return pickle.loads(data)
 
 
 class LedgerServer:

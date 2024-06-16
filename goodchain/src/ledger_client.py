@@ -1,5 +1,5 @@
 from database import Database
-from ledger_server import HEADER_SIZE, DATA_FORMAT
+from ledger_server import HEADER_SIZE, DATA_FORMAT, DATA_TYPE
 import pickle
 from transaction_block import TransactionBlock
 import socket
@@ -25,7 +25,7 @@ class LedgerClient:
                         # Send new block
                         if new_block:
                             # Prepare data
-                            block_data = pickle.dumps(new_block)
+                            block_data = pickle.dumps((DATA_TYPE.get("NEW_BLOCK"), new_block))
                             data_length = len(block_data)
                             # Create header
                             header = str(data_length).encode(DATA_FORMAT)
