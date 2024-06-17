@@ -22,11 +22,14 @@ class UserInterface:
     def __init__(self):
         # INPUT
         self.INPUT_ARROW = self.format_text("-> ", TEXT_COLOR.get("YELLOW"))
+        self.PRESS_ENTER_TO_CONTINUE = self.format_text("Press enter to continue.", text_type=TEXT_TYPE.get("BOLD"))
 
         # OUTPUT
         self.INVALID_MENU_ITEM = self.format_text("Invalid menu item.", TEXT_COLOR.get("RED"))
         self.ENTER_DIGITS_ONLY = self.format_text("Enter digits only.", TEXT_COLOR.get("RED"))
         self.INVALID_ID = self.format_text("Invalid id, please try again.", TEXT_COLOR.get("RED"))
+
+        self.BACK = self.format_text('back', text_type=TEXT_TYPE.get("BOLD"))
 
     @staticmethod
     def clear_console():

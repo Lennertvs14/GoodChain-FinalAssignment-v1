@@ -11,7 +11,7 @@ from transaction import Transaction, REWARD
 from transaction_block import TransactionBlock
 from transaction_client import TransactionClient
 from transaction_pool import TransactionPool
-from user_interface import UserInterface, WHITESPACE
+from user_interface import UserInterface, WHITESPACE, TEXT_COLOR, TEXT_TYPE
 from wallet import Wallet
 
 
@@ -85,7 +85,8 @@ class Node:
 
     def show_notifications(self):
         """ Shows notifications """
-        print(f"\nWelcome {self.username}, here are your notifications:\n")
+        self.ui.clear_console()
+        print(f"Welcome {self.username}, here are your notifications:\n")
 
         # Show amount of mined blocks
         current_blocks = Ledger.get_blocks()
@@ -99,7 +100,7 @@ class Node:
                 if transaction.valid is False:
                     print("\nYour following transaction:")
                     print(WHITESPACE + f"{transaction}")
-                    print("is considered invalid and has been canceled!")
+                    print(self.ui.format_text("is considered invalid and has been canceled!", TEXT_COLOR.get("RED")))
                     TransactionPool.remove_transactions([transaction])
                     self.transaction_client.broadcast_change(CRUD.get("DELETE"), [transaction])
                 else:
@@ -155,12 +156,12 @@ class Node:
                         print(WHITESPACE + f"{transaction}")
                         print("is pending for arrival.")
 
-        input("\nPress enter to continue.")
+        input("\n" + self.ui.PRESS_ENTER_TO_CONTINUE)
         return
 
     def show_menu(self):
         """ Shows the private menu """
-        print("Node Menu")
+        print(self.ui.format_text("Node Menu", TEXT_COLOR.get("YELLOW")) + "\n")
         print(
             "1 - Profile\n"
             "2 - Explore the blockchain\n"
@@ -176,13 +177,13 @@ class Node:
 
     def handle_menu_user_input(self):
         """ Handles user input for the private menu interface """
-        chosen_menu_item = input("-> ")
+        chosen_menu_item = input(self.ui.INPUT_ARROW)
         try:
             chosen_menu_item = int(chosen_menu_item)
             match chosen_menu_item:
                 case 1:
                     self.ui.clear_console()
-                    print("Profile")
+                    print(self.ui.format_text("Profile", TEXT_COLOR.get("YELLOW")) + "\n")
                     self.show_profile()
                 case 2:
                     self.ui.clear_console()
@@ -190,45 +191,45 @@ class Node:
                     Ledger.handle_menu_input()
                 case 3:
                     self.ui.clear_console()
-                    print("Check balance")
+                    print(self.ui.format_text("Check balance", TEXT_COLOR.get("YELLOW")) + "\n")
                     print(self.wallet.available_balance)
                 case 4:
                     self.ui.clear_console()
-                    print("Send Coins")
+                    print(self.ui.format_text("Send Coins", TEXT_COLOR.get("YELLOW")) + "\n")
                     self.send_coins()
                 case 5:
                     self.ui.clear_console()
-                    print("Cancel a transaction")
+                    print(self.ui.format_text("Cancel a transaction", TEXT_COLOR.get("YELLOW")) + "\n")
                     self.cancel_pending_transaction()
                 case 6:
                     self.ui.clear_console()
-                    print("Explore the transaction pool")
+                    print(self.ui.format_text("Transaction pool", TEXT_COLOR.get("YELLOW")) + "\n")
                     TransactionPool.show_transaction_pool()
                 case 7:
                     self.ui.clear_console()
-                    print("Mine")
+                    print(self.ui.format_text("Mine menu", TEXT_COLOR.get("YELLOW")) + "\n")
                     self.mine()
                 case 8:
                     self.ui.clear_console()
-                    print("Validate block(s)")
+                    print(self.ui.format_text("Validate block(s)", TEXT_COLOR.get("YELLOW")) + "\n")
                     self.validate_block()
                 case 9:
                     self.ui.clear_console()
-                    print("Transaction history")
+                    print(self.ui.format_text("Transaction history", TEXT_COLOR.get("YELLOW")) + "\n")
                     print(self.wallet.transactions)
                 case 10:
                     self.transaction_server.stop_server()
-                    print("\nThanks for using GoodChain!\n")
+                    print("\nThanks for using GoodChain!")
                     return None
                 case _:
-                    raise ValueError("Invalid choice.")
+                    print(self.ui.INVALID_MENU_ITEM)
         except ValueError:
-            print("Enter valid digits only.")
+            print(self.ui.ENTER_DIGITS_ONLY)
         return self
 
     def show_profile(self):
         """ Prints profile (username, public key and private key) """
-        print(f"Username: {self.username}\n")
+        print(f"Username: \n{self.username}\n")
         print("Public key: ")
         print(fr"{str(self.public_key, encoding='utf-8')}")
         print("Private key: ")
@@ -254,7 +255,7 @@ class Node:
         chosen_transactions = self.__get_transactions_to_mine(maximum_transactions)
 
         # Get confirmation
-        input("Press enter if you wish to proceed, otherwise exit the app.")
+        input(self.ui.PRESS_ENTER_TO_CONTINUE)
 
         valid_transactions = []
         invalid_transactions = []
@@ -290,7 +291,7 @@ class Node:
                 self.ledger_client.broadcast_change(CRUD.get("ADD"), new_block)
 
         except Exception as ex:
-            print("Something went wrong, please try again.")
+            print(self.ui.format_text("Something went wrong, please try again.", TEXT_COLOR.get("RED")))
 
         finally:
             # Remove valid transactions
@@ -303,37 +304,39 @@ class Node:
                 self.transaction_client.broadcast_change(CRUD.get("UPDATE"), invalid_transactions)
 
             # Wrap up the mining process
-            print("\nCongrats, expect your reward soon!")
+            print("\n" + self.ui.format_text("Congrats, expect your reward soon!", TEXT_COLOR.get("GREEN")))
 
     def validate_block(self):
         """ Validates a block of choice """
         blocks = Ledger.get_blocks()
         Ledger.show_ledger()
 
-        chosen_block_id = input("Enter 'back' to go back.\n"
-                                "Enter the ID of the block you'd like to validate:").strip()
+        chosen_block_id = input("Enter " + self.ui.BACK + " to go back.\n"
+                                "Enter the ID of the block you'd like to validate\n" + self.ui.INPUT_ARROW).strip()
         try:
             chosen_block_id = int(chosen_block_id)
             if 0 <= chosen_block_id < len(blocks):
                 chosen_block = blocks[chosen_block_id]
 
                 if chosen_block.miner.username == self.username:
-                    print("You cannot validate the block you mined yourself.")
+                    print(
+                        self.ui.format_text("You cannot validate the block you mined yourself.", TEXT_COLOR.get("RED"))
+                    )
                     return
 
                 validators = chosen_block.validated_by.split()
                 if self.username in validators:
-                    print("You have successfully validated this block.")
+                    print(self.ui.format_text("You have successfully validated this block.", TEXT_COLOR.get("GREEN")))
                     return
 
                 self.verify_block(chosen_block)
-                print("You have successfully validated this block.")
+                print(self.ui.format_text("You have successfully validated this block.", TEXT_COLOR.get("GREEN")))
             else:
-                print("Invalid id, please try again.")
+                print(self.ui.INVALID_ID)
         except ValueError:
             if chosen_block_id == 'back':
                 return
-            print("Invalid id, please try again.")
+            print(self.ui.INVALID_ID)
 
     def send_coins(self):
         """ Creates a transaction for a coin transfer to a given node (chosen by username) """
@@ -358,7 +361,7 @@ class Node:
         # Balance validation
         total_input = withdrawal_amount+transaction_fee
         if self.wallet.available_balance < total_input:
-            print("[FAILED] You do not have enough balance.")
+            print(self.ui.format_text("You do not have enough balance.", TEXT_COLOR.get("RED")))
             return
 
         # Create transaction
@@ -369,15 +372,15 @@ class Node:
         # Get confirmation
         print(f"\nAre you sure you want to proceed with the following transaction:"
               f"\n{WHITESPACE}{transaction}")
-        input(f"Press enter if you are.\n")
+        input(self.ui.PRESS_ENTER_TO_CONTINUE)
 
         transaction.sign(self.private_key)
         if transaction.is_valid():
             TransactionPool.add_transaction(transaction)
             self.transaction_client.broadcast_change(CRUD.get("ADD"), [transaction])
-            print("Your transfer is successfully initialised!")
+            print(self.ui.format_text("Your transfer is successfully initialised!", TEXT_COLOR.get("GREEN")))
         else:
-            print("Your transaction is invalid, please try again.")
+            print(self.ui.format_text("Your transaction is invalid, please try again.", TEXT_COLOR.get("RED")))
 
     def cancel_pending_transaction(self):
         """ Cancels a pending transaction if possible """
@@ -392,7 +395,8 @@ class Node:
                 pending_transactions.append(transaction)
 
         if len(pending_transactions) < 1:
-            print("[FAILED] Only pending transactions can be cancelled, none where found.")
+            error_text = "Only pending transactions can be cancelled, none where found."
+            print(self.ui.format_text(error_text, TEXT_COLOR.get("RED")))
             return
 
         # Show applicable transactions
@@ -403,7 +407,7 @@ class Node:
         transaction_to_cancel = None
         print("Enter the ID of the transaction you'd like to cancel.")
         while transaction_to_cancel is None:
-            transaction_id = input("ID -> ").strip()
+            transaction_id = input("ID " + self.ui.INPUT_ARROW).strip()
             try:
                 transaction_id = int(transaction_id)
                 if 0 < transaction_id <= len(pending_transactions):
@@ -411,20 +415,21 @@ class Node:
                     transaction_to_cancel = pending_transactions[transaction_index]
                     break
                 else:
-                    print("Invalid id, please try again.")
+                    print(self.ui.INVALID_ID)
             except ValueError:
-                    print("Invalid id, please try again.")
+                print(self.ui.INVALID_ID)
 
         TransactionPool.remove_transactions([transaction_to_cancel])
         self.transaction_client.broadcast_change("DELETE", [transaction_to_cancel])
-        print("Your transaction is successfully canceled.")
+        print(self.ui.format_text("Your transaction is successfully canceled.", TEXT_COLOR.get("GREEN")))
 
     def __validate_mining_conditions(self, transaction_pool, is_genesis_block):
         """ Validates if GoodChain's mining conditions are met """
         # Transaction pool validation
         if 0 < len(transaction_pool) < MINIMUM_TRANSACTIONS:
-            print(f"There are not enough transactions in the transaction pool, "
-                  f"there must be at least {MINIMUM_TRANSACTIONS} transactions.")
+            error_text = ("There are not enough transactions in the transaction pool, " +
+                          f"there must be at least {MINIMUM_TRANSACTIONS} transactions.")
+            print(self.ui.format_text(error_text, TEXT_COLOR.get("RED")))
             return False
 
         # Time interval validation
@@ -435,12 +440,15 @@ class Node:
             time_difference = current_time - last_block_creation_date
             required_time_difference_in_minutes = 3
             if time_difference < timedelta(minutes=required_time_difference_in_minutes):
-                print(f"It has not been {required_time_difference_in_minutes} minutes since the last block's creation.")
+                error_text = \
+                    f"It has not been {required_time_difference_in_minutes} minutes since the last block's creation."
+                print(self.ui.format_text(error_text, TEXT_COLOR.get("RED")))
                 return False
             # Last block validation
             verified_block_status = block_status.get("VERIFIED")
             if last_block.status != verified_block_status:
-                print(f"You can not mine a new block until the latest is considered valid.")
+                error_text = f"You can not mine a new block until the latest is considered valid."
+                print(self.ui.format_text(error_text, TEXT_COLOR.get("RED")))
                 return False
 
         # All checks passed
@@ -478,25 +486,27 @@ class Node:
             print(f"Note: the loop will stop soon as you reach {transactions_to_chose} distinct transactions "
                   f"or if you write 'done'.")
             while len(chosen_transactions) < maximum_transactions:
-                transaction_id = input("ID -> ").strip()
+                transaction_id = input("ID " + self.ui.INPUT_ARROW).strip()
                 try:
                     transaction_id = int(transaction_id) - 1
                     if transaction_id in chosen_transaction_identities:
-                        print("You have chosen this transaction already, please try another one.")
+                        error_text = "You have chosen this transaction already, please try another one."
+                        print(self.ui.format_text(error_text, TEXT_COLOR.get("RED")))
                     elif 0 <= transaction_id < len(remaining_transactions):
                         chosen_transaction_identities.append(transaction_id)
                         chosen_transactions.append(remaining_transactions[transaction_id])
                     else:
-                        print("Invalid id, please try again.")
+                        print(self.ui.INVALID_ID)
                 except ValueError:
                     if transaction_id.lower() == "done":
                         if len(chosen_transactions) >= MINIMUM_TRANSACTIONS:
                             break
                         else:
-                            print(f"You must chose at least {MINIMUM_TRANSACTIONS - len(chosen_transactions)} "
-                                  f"transaction(s) more.")
+                            error_text = (f"You must chose at least {MINIMUM_TRANSACTIONS-len(chosen_transactions)} " +
+                                          "transaction(s) more.")
+                            print(self.ui.format_text(error_text, TEXT_COLOR.get("RED")))
                     else:
-                        print("Invalid id, please try again.")
+                        print(self.ui.INVALID_ID)
         return chosen_transactions
 
     def __flag_invalid_transactions(self, invalid_transactions: list[Transaction]):
@@ -507,15 +517,16 @@ class Node:
 
     def __get_recipient_node_by_username(self):
         """ Returns a node chosen by the user to send coins to """
-        recipient_username = input("Write 'back' to go back.\n"
-                                   "Username -> ").strip()
+        recipient_username = input("Write " + self.ui.BACK + " to go back.\n"
+                                   "Username " + self.ui.INPUT_ARROW).strip()
         if recipient_username == 'back':
             return None
         recipient_node = self.database.get_node_by_username(recipient_username)
         if recipient_node and recipient_node[0] != self.username:
             return recipient_node
         else:
-            print(f"No node with this username could be found, please try again.")
+            error_text = f"No node with this username could be found, please try again."
+            print(self.ui.format_text(error_text, TEXT_COLOR.get("RED")))
             return self.__get_recipient_node_by_username()
 
     def __get_transfer_amount(self):
@@ -523,15 +534,16 @@ class Node:
         Prompts the user to specify the amount of coins to transfer.
         Returns the amount of coins the user would like to transfer.
         """
-        amount = input("Write 'back' to go back.\n"
-                       "Amount -> ").strip()
+        amount = input("Write " + self.ui.BACK + " to go back.\n"
+                       "Amount " + self.ui.INPUT_ARROW).strip()
         if amount == 'back':
             return None
         try:
             float_value = float(amount.replace(',', '.'))
             return float_value
         except ValueError:
-            print(f"This is not an acceptable amount, please try again.")
+            error_text = f"This is not an acceptable amount, please try again."
+            print(self.ui.format_text(error_text, TEXT_COLOR.get("RED")))
             return self.__get_transfer_amount()
 
     def __generate_serialized_keys(self):

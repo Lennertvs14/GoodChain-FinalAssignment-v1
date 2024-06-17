@@ -1,6 +1,7 @@
 from database import Database
 import signature
 from uuid import uuid4
+from user_interface import UserInterface, TEXT_COLOR
 
 
 NORMAL = 0
@@ -98,4 +99,5 @@ class Transaction:
         if self.type != REWARD and self.valid:
             result += " | Is valid: "
             result += str(self.valid)
-        return result
+
+        return UserInterface.format_text(result, TEXT_COLOR.get("CYAN"))

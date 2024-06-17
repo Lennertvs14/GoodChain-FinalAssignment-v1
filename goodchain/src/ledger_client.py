@@ -36,6 +36,6 @@ class LedgerClient:
                             s.send(block_data)
                 except OSError as os_error:
                     # Connection to this server cannot be established.
-                    print(f"Connection to this server {server_port} cannot be established.")
+                    pass
                 finally:
                     s.close()

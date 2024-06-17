@@ -1,5 +1,5 @@
 from user import User
-from user_interface import UserInterface, TEXT_TYPE
+from user_interface import UserInterface
 from system import System
 
 
@@ -13,7 +13,7 @@ def run_goodchain_app(node=None):
     if user_is_logged_in:
         node.show_menu()
         node = node.handle_menu_user_input()
-        input(UserInterface.format_text("Press enter to continue.", text_type=TEXT_TYPE.get("BOLD")))
+        input("\n" + UserInterface().PRESS_ENTER_TO_CONTINUE)
     else:
         # Start the application with a public menu interface
         user.show_menu()
