@@ -2,19 +2,21 @@ from hashlib import sha256
 from ledger import path as ledger_path
 from transaction import Transaction, REWARD
 from transaction_pool import TransactionPool, path as transaction_pool_path
+from user_interface import UserInterface, TEXT_COLOR
 
 
-system_hash_path = "../data/system.dat"
+SYSTEM_HASH_PATH = "../data/system.dat"
 
 
 class System:
     """ Represents the system-level operations and checks in the application """
+
     @staticmethod
     def grant_reward(receiver_node, amount: float):
         """ Grants & Returns a reward to a node by initializing a transaction """
         reward_transaction = Transaction(transaction_type=REWARD)
         reward_transaction.add_output(receiver_node.public_key, amount)
-        reward_transaction.valid = True # System created transactions such as reward transactions are always valid
+        reward_transaction.valid = True  # System created transactions such as reward transactions are always valid
         TransactionPool.add_transaction(reward_transaction)
         return reward_transaction
 
@@ -25,9 +27,10 @@ class System:
         """ Returns whether the system's data files are not tampered with """
         current_system_hash = self.__compute_hash()
         if not self.system_hash == current_system_hash:
-            print("System startup aborted: Integrity check failed.\n"
-                  "Unauthorized modifications have been detected in the system files.\n"
-                  "Undo your modifications or contact GoodChain's helpdesk for support (support@goodchain.com).")
+            error_text = ("System startup aborted: Integrity check failed.\n"
+                          "Unauthorized modifications have been detected in the system files.\n"
+                          "Undo your modifications or contact GoodChain's helpdesk for support (support@goodchain.com).")
+            print(UserInterface.format_text(error_text, TEXT_COLOR.get("RED")))
             self.exit()
         else:
             return True
@@ -41,7 +44,7 @@ class System:
     def __get_system_hash(self):
         saved_system_hash = ""
         try:
-            with open(system_hash_path, "r") as file:
+            with open(SYSTEM_HASH_PATH, "r") as file:
                 while True:
                     data = file.read()
                     if not data:
@@ -61,8 +64,8 @@ class System:
     def __set_system_hash(self, system_hash):
         """ Sets system hash to the data file """
         import os
-        os.makedirs(os.path.dirname(system_hash_path), exist_ok=True)
-        with open(system_hash_path, "wb") as file:
+        os.makedirs(os.path.dirname(SYSTEM_HASH_PATH), exist_ok=True)
+        with open(SYSTEM_HASH_PATH, "wb") as file:
             file.write(bytes(system_hash, 'utf-8'))
 
     def __compute_hash(self):

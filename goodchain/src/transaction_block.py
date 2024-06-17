@@ -2,9 +2,10 @@ from block import Block
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from time import time
+from user_interface import UserInterface, TEXT_COLOR
 
 
-timing_variable = 20
+TIMING_VARIABLE = 20
 
 
 class TransactionBlock(Block):
@@ -39,14 +40,15 @@ class TransactionBlock(Block):
             new_digest.update(bytes(str(nonce), 'utf-8'))
             new_hash = new_digest.finalize()
             if new_hash[:leading_zero] == bytes('0' * leading_zero, 'utf-8'):
-                if int(new_hash[leading_zero]) < timing_variable and (time() - start_time) > 10:
+                if int(new_hash[leading_zero]) < TIMING_VARIABLE and (time() - start_time) > 10:
                     found = True
                     end_time = time()
                     self.nonce = nonce
                     self.block_hash = self.compute_hash()
                     print(f"Block #{self.id} is mined in {end_time - start_time} seconds.")
             elif (time() - start_time) > 20:
-                print("The mining process took too long, please try again later.")
+                error_text = "The mining process took too long, please try again later."
+                print(UserInterface.format_text(error_text, TEXT_COLOR.get("RED")))
                 break
             nonce += 1
             del new_digest

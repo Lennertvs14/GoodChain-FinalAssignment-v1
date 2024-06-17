@@ -1,6 +1,6 @@
 import pickle
 from transaction import Transaction, REWARD
-from user_interface import WHITESPACE
+from user_interface import UserInterface, WHITESPACE, TEXT_COLOR
 
 
 path = "../data/transaction_pool.dat"
@@ -48,7 +48,6 @@ class TransactionPool:
     @staticmethod
     def show_transaction_pool(with_reward_transactions=True, with_invalid_transactions=True):
         """ Prints the current transaction pool """
-        print("Transaction pool:")
         transactions = TransactionPool.get_transactions()
         if transactions and len(transactions) > 0:
             for i, transaction in enumerate(transactions, start=1):
@@ -57,7 +56,7 @@ class TransactionPool:
                         continue
                     print(WHITESPACE + f"[{i}] {transaction}")
         else:
-            print(WHITESPACE + "No transactions found.")
+            print(WHITESPACE + UserInterface.format_text("TEXT", TEXT_COLOR.get("RED")))
 
     @staticmethod
     def get_transactions(with_reward_transactions=True):

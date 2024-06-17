@@ -2,6 +2,7 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization
+from user_interface import UserInterface, TEXT_COLOR
 
 
 def sign(message, private_key):
@@ -31,5 +32,5 @@ def verify(message, signature, pbc_ser):
     except InvalidSignature:
         return False
     except:
-        print("An error occurred, please try again.")
+        print(UserInterface.format_text("An error occurred, please try again.", TEXT_COLOR.get("RED")))
         return False

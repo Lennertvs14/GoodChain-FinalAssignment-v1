@@ -192,7 +192,11 @@ class Node:
                 case 3:
                     self.ui.clear_console()
                     print(self.ui.format_text("Check balance", TEXT_COLOR.get("YELLOW")) + "\n")
-                    print(self.wallet.available_balance)
+                    balance = self.wallet.available_balance
+                    if balance > 0.0:
+                        print(self.ui.format_text(str(balance), TEXT_COLOR.get("GREEN")))
+                    else:
+                        print(self.ui.format_text(str(balance), TEXT_COLOR.get("RED")))
                 case 4:
                     self.ui.clear_console()
                     print(self.ui.format_text("Send Coins", TEXT_COLOR.get("YELLOW")) + "\n")
