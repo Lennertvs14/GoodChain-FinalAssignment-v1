@@ -1,9 +1,10 @@
 import pickle
 from transaction_block import TransactionBlock
-from user_interface import UserInterface, whitespace
+from user_interface import UserInterface, WHITESPACE
 
 
 path = "../data/ledger.dat"
+UI = UserInterface()
 
 
 class Ledger:
@@ -24,23 +25,22 @@ class Ledger:
     @staticmethod
     def handle_menu_input():
         """ Handles user input for the ledger menu interface """
-        ui = UserInterface()
         chosen_menu_item = input("-> ")
         try:
             chosen_menu_item = int(chosen_menu_item)
             match chosen_menu_item:
                 case 1:
-                    ui.clear_console()
+                    UI.clear_console()
                     Ledger.show_block_by_id()
                 case 2:
-                    ui.clear_console()
+                    UI.clear_console()
                     Ledger.show_ledger()
                 case 3:
-                    ui.clear_console()
+                    UI.clear_console()
                     Ledger.show_ledger_paged()
                 case 4:
-                    ui.clear_console()
-                    print(whitespace + f"{Ledger.get_last_block()}")
+                    UI.clear_console()
+                    print(WHITESPACE + f"{Ledger.get_last_block()}")
                 case 5:
                     return
                 case _:
@@ -58,7 +58,7 @@ class Ledger:
                 chosen_block_id = int(chosen_block_id)
                 if 0 <= chosen_block_id < len(blocks):
                     chosen_block = blocks[chosen_block_id]
-                    print(whitespace + f"{chosen_block}")
+                    print(WHITESPACE + f"{chosen_block}")
                 else:
                     print("Invalid id, please try again.")
             except ValueError:
@@ -82,7 +82,7 @@ class Ledger:
         if blocks is not None and len(blocks) > 0:
             print("Blocks:")
             for block in blocks:
-                print(whitespace + f"{block}")
+                print(WHITESPACE + f"{block}")
         else:
             print("There are no blocks in our chain yet.")
 
@@ -106,7 +106,7 @@ class Ledger:
             blocks_on_current_page = all_blocks[start_index:end_index]
 
             for block in blocks_on_current_page:
-                print(whitespace + f"{block}")
+                print(WHITESPACE + f"{block}")
                 print()
 
             print("1 - Next page")

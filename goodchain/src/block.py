@@ -1,7 +1,7 @@
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from datetime import datetime
-from user_interface import whitespace
+from user_interface import WHITESPACE
 
 
 # Block statuses
@@ -58,24 +58,24 @@ class Block:
         result = ""
 
         result += f"Block ID: {str(self.id)}\n"
-        result += whitespace + fr"Block hash value: {str(self.block_hash)}" + "\n"
+        result += WHITESPACE + fr"Block hash value: {str(self.block_hash)}" + "\n"
 
         if self.previous_block:
-            result += whitespace + fr"Previous block hash value: {str(self.previous_block_hash)}" + "\n"
+            result += WHITESPACE + fr"Previous block hash value: {str(self.previous_block_hash)}" + "\n"
 
-        result += whitespace + "Data:\n"
+        result += WHITESPACE + "Data:\n"
         for t in self.data:
-            result += whitespace + whitespace
+            result += WHITESPACE + WHITESPACE
             result += f"{t}"
             result += "\n"
 
-        result += whitespace + f"Mined by: {self.miner.username}\n"
-        result += whitespace + f"Total transaction fee: {str(self.total_transaction_fee)}\n"
-        result += whitespace + fr"Nonce: {str(self.nonce)}" + "\n"
-        result += whitespace + f"Creation date: {str(self.creation_date)}\n"
-        result += whitespace + f"Validated by: {str(self.validated_by)}\n"
-        result += whitespace + f"Valid flags: {str(self.valid_flags)}\n"
-        result += whitespace + f"Invalid flags: {str(self.invalid_flags)}\n"
-        result += whitespace + f"Status: {str(self.status)}\n"
+        result += WHITESPACE + f"Mined by: {self.miner.username}\n"
+        result += WHITESPACE + f"Total transaction fee: {str(self.total_transaction_fee)}\n"
+        result += WHITESPACE + fr"Nonce: {str(self.nonce)}" + "\n"
+        result += WHITESPACE + f"Creation date: {str(self.creation_date)}\n"
+        result += WHITESPACE + f"Validated by: {str(self.validated_by)}\n"
+        result += WHITESPACE + f"Valid flags: {str(self.valid_flags)}\n"
+        result += WHITESPACE + f"Invalid flags: {str(self.invalid_flags)}\n"
+        result += WHITESPACE + f"Status: {str(self.status)}\n"
 
         return result

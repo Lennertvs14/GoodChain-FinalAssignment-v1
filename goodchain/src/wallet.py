@@ -2,7 +2,7 @@ from block import block_status
 from ledger import Ledger
 from transaction import REWARD
 from transaction_pool import TransactionPool
-from user_interface import whitespace
+from user_interface import WHITESPACE
 
 
 class Wallet:
@@ -29,11 +29,11 @@ class Wallet:
         if len(credit) > 0:
             result += "+ RECEIVED +\n"
             for t in credit:
-                result += whitespace + f"{t}\n"
+                result += WHITESPACE + f"{t}\n"
         if len(debet) > 0:
             result += "- SEND -\n"
             for t in debet:
-                result += whitespace + f"{t}\n"
+                result += WHITESPACE + f"{t}\n"
 
         result += "\n"
 
@@ -52,11 +52,11 @@ class Wallet:
         if len(credit) > 0:
             result += "+ TO RECEIVE +\n"
             for t in credit:
-                result += whitespace + f"{t}\n"
+                result += WHITESPACE + f"{t}\n"
         if len(debet) > 0:
             result += "- TO SEND -\n"
             for t in debet:
-                result += whitespace + f"{t}\n"
+                result += WHITESPACE + f"{t}\n"
 
         return result
 

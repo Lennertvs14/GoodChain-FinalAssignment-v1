@@ -1,6 +1,6 @@
 import pickle
 from transaction import Transaction, REWARD
-from user_interface import whitespace
+from user_interface import WHITESPACE
 
 
 path = "../data/transaction_pool.dat"
@@ -55,9 +55,9 @@ class TransactionPool:
                 if transaction and (with_reward_transactions or transaction.type != REWARD):
                     if not with_invalid_transactions and transaction.valid == False:
                         continue
-                    print(whitespace + f"[{i}] {transaction}")
+                    print(WHITESPACE + f"[{i}] {transaction}")
         else:
-            print(whitespace + "No transactions found.")
+            print(WHITESPACE + "No transactions found.")
 
     @staticmethod
     def get_transactions(with_reward_transactions=True):

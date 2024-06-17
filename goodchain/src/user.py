@@ -37,12 +37,10 @@ class User:
         self.ledger_server = LedgerServer()
         self.ledger_server.start_server()
         self.database.insert_ledger_server(self.ledger_server.port)
-        print(f"LISTENING FOR BLOCKS ON {self.ledger_server.port}")
 
         self.transaction_server = TransactionServer()
         self.transaction_server.start_server()
         self.database.insert_transaction_server(self.transaction_server.port)
-        print(f"LISTENING FOR TRANSACTIONS ON {self.transaction_server.port}")
 
     def handle_menu_user_input(self):
         """ Handles user input for the public menu interface """

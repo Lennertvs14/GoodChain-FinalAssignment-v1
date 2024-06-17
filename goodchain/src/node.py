@@ -11,7 +11,7 @@ from transaction import Transaction, REWARD
 from transaction_block import TransactionBlock
 from transaction_client import TransactionClient
 from transaction_pool import TransactionPool
-from user_interface import UserInterface, whitespace
+from user_interface import UserInterface, WHITESPACE
 from wallet import Wallet
 
 
@@ -98,17 +98,17 @@ class Node:
             if transaction.type != REWARD and transaction.input[0] == self.public_key:
                 if transaction.valid is False:
                     print("\nYour following transaction:")
-                    print(whitespace + f"{transaction}")
+                    print(WHITESPACE + f"{transaction}")
                     print("is considered invalid and has been canceled!")
                     TransactionPool.remove_transactions([transaction])
                     self.transaction_client.broadcast_change(CRUD.get("DELETE"), [transaction])
                 else:
                     print("\nYour following transaction:")
-                    print(whitespace + f"{transaction}")
+                    print(WHITESPACE + f"{transaction}")
                     print("is still pending for withdrawal.")
             elif transaction.output[0] == self.public_key and transaction.valid is True:
                 print("\nThe following transaction:")
-                print(whitespace + f"{transaction}")
+                print(WHITESPACE + f"{transaction}")
                 print("is pending for arrival.")
 
         # Get last login date
@@ -125,7 +125,7 @@ class Node:
         for block in current_blocks:
             if last_login_date is None or block.creation_date > last_login_date:
                 new_blocks.append(block)
-                print(whitespace + f"#{block.id}")
+                print(WHITESPACE + f"#{block.id}")
 
         # Update last login date
         self.database.update_last_login_date(self.username)
@@ -139,20 +139,20 @@ class Node:
                 if transaction.type != REWARD and transaction.input[0] == self.public_key:
                     if block.status == block_status.get("VERIFIED"):
                         print("\nYour following transaction:")
-                        print(whitespace + f"{transaction}")
+                        print(WHITESPACE + f"{transaction}")
                         print("is transferred successfully.")
                     else:
                         print("\nYour following transaction:")
-                        print(whitespace + f"{transaction}")
+                        print(WHITESPACE + f"{transaction}")
                         print("is still pending for arrival.")
                 elif transaction.output[0] == self.public_key:
                     if block.status == block_status.get("VERIFIED"):
                         print("\nYou have received the following transaction:")
-                        print(whitespace + f"{transaction}")
+                        print(WHITESPACE + f"{transaction}")
                         print("successfully.")
                     else:
                         print("\nThe following transaction:")
-                        print(whitespace + f"{transaction}")
+                        print(WHITESPACE + f"{transaction}")
                         print("is pending for arrival.")
 
         input("\nPress enter to continue.")
@@ -369,7 +369,7 @@ class Node:
 
         # Get confirmation
         print(f"\nAre you sure you want to proceed with the following transaction:"
-              f"\n{whitespace}{transaction}")
+              f"\n{WHITESPACE}{transaction}")
         input(f"Press enter if you are.\n")
 
         transaction.sign(self.private_key)
@@ -457,7 +457,7 @@ class Node:
         i = 0
         while i < required_transactions:
             transaction = all_transactions[i]
-            print(whitespace + f"{transaction}")
+            print(WHITESPACE + f"{transaction}")
             chosen_transactions.append(transaction)
             i += 1
 
@@ -472,7 +472,7 @@ class Node:
             # Show available transactions to choose from
             if show_transactions and transactions_to_chose > 0:
                 for i, transaction in enumerate(remaining_transactions, start=1):
-                    print(whitespace + f"[{i}] {transaction}")
+                    print(WHITESPACE + f"[{i}] {transaction}")
 
             # Handle user input
             print("Enter the identities of the transactions you'd like to mine one for one.")
