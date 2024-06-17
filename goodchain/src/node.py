@@ -8,8 +8,9 @@ from ledger_client import LedgerClient
 from ledger_server import CRUD
 from system import System
 from transaction import Transaction, REWARD
-from transaction_pool import TransactionPool
 from transaction_block import TransactionBlock
+from transaction_client import TransactionClient
+from transaction_pool import TransactionPool
 from user_interface import UserInterface, whitespace
 from wallet import Wallet
 
@@ -23,7 +24,8 @@ class Node:
     ui = UserInterface()
     database = Database()
 
-    def __init__(self, username, password_hash, ledger_server, public_key=None, private_key=None, show_notifications=False):
+    def __init__(self, username, password_hash, ledger_server, transaction_server,
+                 public_key=None, private_key=None, show_notifications=False):
         self.username = username
         self.password_hash = password_hash
         if public_key and private_key:
@@ -31,10 +33,13 @@ class Node:
             self.private_key = private_key
         else:
             self.private_key, self.public_key = self.__generate_serialized_keys()
-        self.ledger_server = ledger_server
-
         self.wallet = Wallet(self)
+
+        self.ledger_server = ledger_server
         self.ledger_client = LedgerClient(self.ledger_server.port)
+        self.transaction_server = transaction_server
+        self.transaction_client = TransactionClient(self.transaction_server.port)
+
         self.check_last_block()
         if show_notifications:
             self.show_notifications()
@@ -62,11 +67,13 @@ class Node:
         if block.valid_flags == 3:
             block.status = VERIFIED_BLOCK_STATUS
             miners_reward = 50.0
-            System.grant_reward(block.miner, (miners_reward + block.total_transaction_fee))
+            reward_transaction = System.grant_reward(block.miner, (miners_reward + block.total_transaction_fee))
+            self.transaction_client.broadcast_change(CRUD.get("ADD"), [reward_transaction])
         elif block.invalid_flags == 3:
             # Return transactions to pool
             for transaction in block.data:
                 TransactionPool.add_transaction(transaction)
+                self.transaction_client.broadcast_change(CRUD.get("ADD"), [transaction])
             # Remove block from ledger
             Ledger.remove_block(block)
             self.ledger_client.broadcast_change(CRUD.get("DELETE"), block)
@@ -89,19 +96,20 @@ class Node:
         transaction_pool = TransactionPool.get_transactions()
         for transaction in transaction_pool:
             if transaction.type != REWARD and transaction.input[0] == self.public_key:
-                if transaction.valid == False:
+                if transaction.valid is False:
                     print("\nYour following transaction:")
                     print(whitespace + f"{transaction}")
-                    print("is considered invalid and canceled!")
+                    print("is considered invalid and has been canceled!")
                     TransactionPool.remove_transactions([transaction])
+                    self.transaction_client.broadcast_change(CRUD.get("DELETE"), [transaction])
                 else:
                     print("\nYour following transaction:")
                     print(whitespace + f"{transaction}")
                     print("is still pending for withdrawal.")
-            elif transaction.output[0] == self.public_key and transaction.valid == True:
-                    print("\nThe following transaction:")
-                    print(whitespace + f"{transaction}")
-                    print("is pending for arrival.")
+            elif transaction.output[0] == self.public_key and transaction.valid is True:
+                print("\nThe following transaction:")
+                print(whitespace + f"{transaction}")
+                print("is pending for arrival.")
 
         # Get last login date
         last_login_date = self.database.get_last_login_date(self.username)
@@ -210,6 +218,7 @@ class Node:
                     print(self.wallet.transactions)
                 case 10:
                     self.ui.clear_console()
+                    self.transaction_server.stop_server()
                     print("You're logged out, thanks for using GoodChain!")
                     return None
                 case _:
@@ -248,11 +257,9 @@ class Node:
         # Get confirmation
         input("Press enter if you wish to proceed, otherwise exit the app.")
 
-        new_block = None
+        valid_transactions = []
+        invalid_transactions = []
         try:
-            valid_transactions = []
-            invalid_transactions = []
-
             for i, transaction in enumerate(chosen_transactions):
                 if transaction.is_valid():
                     transaction.valid = True
@@ -278,25 +285,29 @@ class Node:
             new_block.miner = self
             new_block.total_transaction_fee = total_transaction_fee
 
-            # Add new block to ledger
             if new_block.block_hash:
+                # Add new block to ledger
                 Ledger.add_block(new_block)
+                self.ledger_client.broadcast_change(CRUD.get("ADD"), new_block)
 
-                print("\nCongrats, expect your reward soon!")
-
-                if new_block.is_valid():
-                    # Remove valid transactions from pool
-                    TransactionPool.remove_transactions(valid_transactions)
-
-                if len(invalid_transactions) > 0:
-                    TransactionPool.flag_invalid_transactions(invalid_transactions)
         except Exception as ex:
             print("Something went wrong, please try again.")
+
         finally:
-            self.ledger_client.broadcast_change(CRUD.get("ADD"), new_block)
+            # Remove valid transactions
+            TransactionPool.remove_transactions(valid_transactions)
+            self.transaction_client.broadcast_change(CRUD.get("DELETE"), valid_transactions)
+
+            # Flag invalid transactions
+            if len(invalid_transactions) > 0:
+                invalid_transactions = self.__flag_invalid_transactions(invalid_transactions)
+                self.transaction_client.broadcast_change(CRUD.get("UPDATE"), invalid_transactions)
+
+            # Wrap up the mining process
+            print("\nCongrats, expect your reward soon!")
 
     def validate_block(self):
-        """ Validates a block """
+        """ Validates a block of choice """
         blocks = Ledger.get_blocks()
         Ledger.show_ledger()
 
@@ -364,6 +375,7 @@ class Node:
         transaction.sign(self.private_key)
         if transaction.is_valid():
             TransactionPool.add_transaction(transaction)
+            self.transaction_client.broadcast_change(CRUD.get("ADD"), [transaction])
             print("Your transfer is successfully initialised!")
         else:
             print("Your transaction is invalid, please try again.")
@@ -383,7 +395,6 @@ class Node:
         if len(pending_transactions) < 1:
             print("[FAILED] Only pending transactions can be cancelled, none where found.")
             return
-
 
         # Show applicable transactions
         for i, transaction in enumerate(pending_transactions, start=1):
@@ -406,6 +417,7 @@ class Node:
                     print("Invalid id, please try again.")
 
         TransactionPool.remove_transactions([transaction_to_cancel])
+        self.transaction_client.broadcast_change("DELETE", [transaction_to_cancel])
         print("Your transaction is successfully canceled.")
 
     def __validate_mining_conditions(self, transaction_pool, is_genesis_block):
@@ -487,6 +499,12 @@ class Node:
                     else:
                         print("Invalid id, please try again.")
         return chosen_transactions
+
+    def __flag_invalid_transactions(self, invalid_transactions: list[Transaction]):
+        """ Returns the given transactions flagged as invalid """
+        for invalid_transaction in invalid_transactions:
+            invalid_transaction.valid = False
+        return invalid_transactions
 
     def __get_recipient_node_by_username(self):
         """ Returns a node chosen by the user to send coins to """

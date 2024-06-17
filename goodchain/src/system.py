@@ -11,11 +11,12 @@ class System:
     """ Represents the system-level operations and checks in the application """
     @staticmethod
     def grant_reward(receiver_node, amount: float):
-        """ Grants a reward to a node by initializing a transaction """
+        """ Grants & Returns a reward to a node by initializing a transaction """
         reward_transaction = Transaction(transaction_type=REWARD)
         reward_transaction.add_output(receiver_node.public_key, amount)
         reward_transaction.valid = True # System created transactions such as reward transactions are always valid
         TransactionPool.add_transaction(reward_transaction)
+        return reward_transaction
 
     def __init__(self):
         self.system_hash = self.__get_system_hash()
