@@ -5,7 +5,7 @@ from node import Node
 import re
 from system import System
 from transaction_server import TransactionServer
-from user_interface import UserInterface
+from user_interface import UserInterface, TEXT_COLOR
 
 
 class User:
@@ -50,29 +50,31 @@ class User:
             match chosen_menu_item:
                 case 1:
                     self.ui.clear_console()
-                    print("Login")
+                    print(self.ui.format_text("Login", TEXT_COLOR.get("YELLOW")) + "\n")
                     return self.login()
                 case 2:
                     self.ui.clear_console()
                     Ledger.show_menu()
                     Ledger.handle_menu_input()
-                    input("Press enter to continue.")
+                    input("\n" + self.ui.PRESS_ENTER_TO_CONTINUE)
                 case 3:
                     self.ui.clear_console()
-                    print("Sign up")
+                    print(self.ui.format_text("Sign up", TEXT_COLOR.get("YELLOW")) + "\n")
                     self.registrate()
                 case 4:
                     self.ledger_server.stop_server()
                     System().exit()
                 case _:
-                    raise ValueError("Invalid choice.")
+                    print(self.ui.INVALID_MENU_ITEM)
+                    input("\nPress enter to continue.")
         except ValueError:
-            print("Enter digits only.")
+            print(self.ui.ENTER_DIGITS_ONLY)
+            input("\nPress enter to continue.")
 
     def registrate(self):
         """ Registrates a new node """
         from server import CRUD
-        print("Write 'back' to go back.")
+        print("Write " + self.ui.BACK + " to go back.")
         node = self.__create_node()
         if node:
             self.database.insert_node(node)
@@ -101,7 +103,8 @@ class User:
 
             # Login attempt unsuccessful
             remaining_attempts = (max_amount_of_attempts - attempts) - 1
-            print(f"Failed to login, you have {remaining_attempts} attempt(s) left.\n")
+            error_text = f"Failed to login, you have {remaining_attempts} attempt(s) left.\n"
+            print(self.ui.format_text(error_text, TEXT_COLOR.get("RED")))
             attempts += 1
 
         # User tried too many times
@@ -117,7 +120,7 @@ class User:
     def __create_node(self):
         """" Returns a node object based on user input """
         # Get node username
-        username = input("Enter a username -> ").strip()
+        username = input("Enter a username " + self.ui.INPUT_ARROW).strip()
         if username == 'back':
             return None
         elif not self.__validate_username(username):
@@ -126,7 +129,7 @@ class User:
             return self.__create_node()
 
         # Get node password
-        password = input("Enter a password -> ").strip()
+        password = input("Enter a password " + self.ui.INPUT_ARROW).strip()
         if password == 'back':
             return None
         elif not self.__validate_password(password):
@@ -134,8 +137,8 @@ class User:
             print("")
             return self.__create_node()
 
-        input("Are you sure you want to proceed signing up with the information above?\n"
-              "Press enter if you wish to proceed, otherwise exit the app.")
+        print("Are you sure you want to proceed signing up with the information above?")
+        input(self.ui.PRESS_ENTER_TO_CONTINUE)
 
         # Get hash value of password to store to avoid storing the actual password in our database
         password_hash = self.get_password_hash_value(password)
@@ -146,12 +149,12 @@ class User:
     def __validate_username(self, username):
         # Empty check
         if not username:
-            print("[FAILED] Username cannot be empty.")
+            print(self.ui.format_text("Username cannot be empty.", TEXT_COLOR.get("RED")))
             return False
 
         # Duplicate check
         if self.database.get_node_by_username(username) is not None:
-            print("[FAILED] Username already exists.")
+            print(self.ui.format_text("Username already exists.", TEXT_COLOR.get("RED")))
             return False
 
         return True
@@ -161,34 +164,39 @@ class User:
 
         # Empty check
         if not password:
-            print("[FAILED] Password cannot be empty.")
+            print(self.ui.format_text("Password cannot be empty.", TEXT_COLOR.get("RED")))
 
         # Type check
         if not isinstance(password, str):
-            print("[FAILED] Password must contain letters as well.")
+            error_text = "Password must contain letters as well."
+            print(self.ui.format_text(error_text, TEXT_COLOR.get("RED")))
             return False
 
         # Length check
         if len(password) < minimum_amount_of_password_characters:
-            print(f"[FAILED] Password must be at least {minimum_amount_of_password_characters} characters long.")
+            error_text = f"Password must be at least {minimum_amount_of_password_characters} characters long."
+            print(self.ui.format_text(error_text, TEXT_COLOR.get("RED")))
             return False
 
         # Uppercase check
         if not re.search("[A-Z]", password):
-            print("[FAILED] Password must contain at least one uppercase letter.")
+            error_text = "Password must contain at least one uppercase letter."
+            print(self.ui.format_text(error_text, TEXT_COLOR.get("RED")))
             return False
         # Lowercase check
         elif not re.search("[a-z]", password):
-            print("[FAILED] Password must contain at least one lowercase letter.")
+            error_text = "Password must contain at least one lowercase letter."
+            print(self.ui.format_text(error_text, TEXT_COLOR.get("RED")))
 
         # Digit check
         if not re.search("[0-9]", password):
-            print("[FAILED] Password must contain at least one digit.")
+            print(self.ui.format_text("Password must contain at least one digit.", TEXT_COLOR.get("RED")))
             return False
 
         # Special character check
         if not re.search("[!@#$%^&*()]", password):
-            print("[FAILED] Password must contain at least one special character: (!@#$%^&*()).")
+            error_text = "Password must contain at least one special character: (!@#$%^&*())."
+            print(self.ui.format_text(error_text, TEXT_COLOR.get("RED")))
             return False
 
         return True
