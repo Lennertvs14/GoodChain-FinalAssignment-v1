@@ -1,10 +1,11 @@
 import pickle
 from transaction_block import TransactionBlock
-from user_interface import UserInterface, WHITESPACE
+from user_interface import UserInterface, WHITESPACE, TEXT_COLOR
 
 
 path = "../data/ledger.dat"
 UI = UserInterface()
+NO_BLOCKS_IN_CHAIN = UI.format_text("There are no blocks in our chain yet.", TEXT_COLOR.get("RED"))
 
 
 class Ledger:
@@ -13,7 +14,7 @@ class Ledger:
     @staticmethod
     def show_menu():
         """ Shows the ledger menu """
-        print("Ledger Menu\n")
+        print(UI.format_text("Ledger Menu\n", TEXT_COLOR.get("YELLOW")))
         print(
             "1 - View specific block by its number\n"
             "2 - View all blocks\n"
@@ -25,7 +26,7 @@ class Ledger:
     @staticmethod
     def handle_menu_input():
         """ Handles user input for the ledger menu interface """
-        chosen_menu_item = input("-> ")
+        chosen_menu_item = input(UI.INPUT_ARROW)
         try:
             chosen_menu_item = int(chosen_menu_item)
             match chosen_menu_item:
@@ -40,33 +41,33 @@ class Ledger:
                     Ledger.show_ledger_paged()
                 case 4:
                     UI.clear_console()
-                    print(WHITESPACE + f"{Ledger.get_last_block()}")
+                    print(WHITESPACE + UI.format_text(f"{Ledger.get_last_block()}", TEXT_COLOR.get("CYAN")))
                 case 5:
                     return
                 case _:
-                    raise ValueError("Invalid choice.")
+                    raise ValueError(UI.INVALID_MENU_ITEM)
         except ValueError:
-            print("Enter digits only.")
+            print(UI.ENTER_DIGITS_ONLY)
 
     @staticmethod
     def show_block_by_id():
         """ Prints a block by id"""
         blocks = Ledger.get_blocks()
         if blocks:
-            chosen_block_id = input("\nEnter the ID of the block you'd like to validate:").strip()
+            chosen_block_id = input("\nEnter the ID of the block you'd like to validate.\n" + UI.INPUT_ARROW).strip()
             try:
                 chosen_block_id = int(chosen_block_id)
                 if 0 <= chosen_block_id < len(blocks):
                     chosen_block = blocks[chosen_block_id]
-                    print(WHITESPACE + f"{chosen_block}")
+                    print(WHITESPACE + UI.format_text(f"{chosen_block}", TEXT_COLOR.get("CYAN")))
                 else:
-                    print("Invalid id, please try again.")
+                    print(UI.INVALID_ID)
             except ValueError:
                 if chosen_block_id == 'back':
                     return
-                print("Invalid id, please try again.")
+                print(UI.INVALID_ID)
         else:
-            print("There are no blocks in our chain yet.")
+            print(NO_BLOCKS_IN_CHAIN)
 
     @staticmethod
     def add_block(block: TransactionBlock):
@@ -80,18 +81,18 @@ class Ledger:
         """ Prints out the current ledger """
         blocks = Ledger.get_blocks()
         if blocks is not None and len(blocks) > 0:
-            print("Blocks:")
+            print("ALL BLOCKS:")
             for block in blocks:
-                print(WHITESPACE + f"{block}")
+                print(WHITESPACE + UI.format_text(f"{block}", TEXT_COLOR.get("CYAN")))
         else:
-            print("There are no blocks in our chain yet.")
+            print(NO_BLOCKS_IN_CHAIN)
 
     @staticmethod
     def show_ledger_paged():
         all_blocks = Ledger.get_blocks()
 
         if all_blocks is None or len(all_blocks) < 1:
-            print("No blocks in the ledger.")
+            print(NO_BLOCKS_IN_CHAIN)
             return
 
         current_page = 0
@@ -99,7 +100,7 @@ class Ledger:
         total_pages = -(-len(all_blocks) // page_size)
 
         while True:
-            print(f"\nPage {current_page + 1} of {total_pages}\n")
+            print(UI.format_text(f"\nPage {current_page + 1} of {total_pages}\n", TEXT_COLOR.get("YELLOW")))
 
             start_index = current_page * page_size
             end_index = start_index + page_size
@@ -109,11 +110,12 @@ class Ledger:
                 print(WHITESPACE + f"{block}")
                 print()
 
+            print("-----------------\n")
             print("1 - Next page")
             print("2 - Previous page")
             print("3 - Go back\n")
 
-            choice = input("-> ")
+            choice = input(UI.INPUT_ARROW)
 
             if choice == "1" and current_page < total_pages - 1:
                 current_page += 1
@@ -122,7 +124,7 @@ class Ledger:
             elif choice == "3":
                 break
             else:
-                print("Invalid choice.")
+                print(UI.INVALID_MENU_ITEM)
 
     @staticmethod
     def get_blocks():

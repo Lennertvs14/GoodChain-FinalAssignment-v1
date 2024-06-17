@@ -19,6 +19,15 @@ TEXT_TYPE = {
 
 class UserInterface:
     """ Represents the console based user interface """
+    def __init__(self):
+        # INPUT
+        self.INPUT_ARROW = self.format_text("-> ", TEXT_COLOR.get("YELLOW"))
+
+        # OUTPUT
+        self.INVALID_MENU_ITEM = self.format_text("Invalid menu item.", TEXT_COLOR.get("RED"))
+        self.ENTER_DIGITS_ONLY = self.format_text("Enter digits only.", TEXT_COLOR.get("RED"))
+        self.INVALID_ID = self.format_text("Invalid id, please try again.", TEXT_COLOR.get("RED"))
+
     @staticmethod
     def clear_console():
         """ Clears the console screen for Windows, macOS and Linux. """

@@ -1,7 +1,7 @@
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from datetime import datetime
-from user_interface import WHITESPACE
+from user_interface import UserInterface, WHITESPACE, TEXT_COLOR
 
 
 # Block statuses
@@ -34,8 +34,8 @@ class Block:
 
     def compute_hash(self):
         digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
-        digest.update(bytes(str(self.data),'utf-8'))
-        digest.update(bytes(str(self.previous_block_hash),'utf-8'))
+        digest.update(bytes(str(self.data), 'utf-8'))
+        digest.update(bytes(str(self.previous_block_hash), 'utf-8'))
         return digest.finalize()
 
     def is_valid(self):
@@ -78,4 +78,4 @@ class Block:
         result += WHITESPACE + f"Invalid flags: {str(self.invalid_flags)}\n"
         result += WHITESPACE + f"Status: {str(self.status)}\n"
 
-        return result
+        return UserInterface.format_text(result, TEXT_COLOR.get("CYAN"))
