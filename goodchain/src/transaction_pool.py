@@ -28,16 +28,19 @@ class TransactionPool:
                 pickle.dump(transaction, pool)
 
     @staticmethod
-    def flag_invalid_transactions(invalid_transactions: list[Transaction]):
-        """ Sets the given transactions as invalid and updates the pool """
+    def update_transactions(updated_transactions: list[Transaction]):
+        """ Updates the pool with the passed transactions """
         transactions = TransactionPool.get_transactions()
-        for transaction in transactions:
-            for invalid_transaction in invalid_transactions:
-                if transaction.id == invalid_transaction.id:
-                    transaction.valid = False
-                    break
 
-        # Overwrite transaction pool file
+        # Create a dictionary of updated transactions for quick lookup
+        updated_transactions_dict = {ut.id: ut for ut in updated_transactions}
+
+        # Update transactions in the pool
+        for i, transaction in enumerate(transactions):
+            if transaction.id in updated_transactions_dict:
+                transactions[i] = updated_transactions_dict[transaction.id]
+
+        # Write the updated transactions back to the file
         with open(path, "wb") as pool:
             for transaction in transactions:
                 pickle.dump(transaction, pool)
@@ -73,13 +76,3 @@ class TransactionPool:
             # No more lines to read from file.
             pass
         return transactions
-
-    @staticmethod
-    def get_reward_transactions():
-        """ Returns a list of reward transactions out of the pool """
-        all_transactions = TransactionPool.get_transactions()
-        reward_transactions = []
-        for transaction in all_transactions:
-            if transaction.type == REWARD:
-                reward_transactions.append(transaction)
-        return reward_transactions
