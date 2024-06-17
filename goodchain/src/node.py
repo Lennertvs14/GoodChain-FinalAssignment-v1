@@ -217,9 +217,8 @@ class Node:
                     print("Transaction history")
                     print(self.wallet.transactions)
                 case 10:
-                    self.ui.clear_console()
                     self.transaction_server.stop_server()
-                    print("You're logged out, thanks for using GoodChain!")
+                    print("\nThanks for using GoodChain!\n")
                     return None
                 case _:
                     raise ValueError("Invalid choice.")

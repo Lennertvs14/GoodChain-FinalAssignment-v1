@@ -1,26 +1,25 @@
 from user import User
-from user_interface import UserInterface
+from user_interface import UserInterface, TEXT_TYPE
 from system import System
 
 
-ui = UserInterface()
 user = None
 
 
 def run_goodchain_app(node=None):
     """ Runs the GoodChain application """
-    global ui, user
+    global user
     user_is_logged_in = node is not None
     if user_is_logged_in:
         node.show_menu()
         node = node.handle_menu_user_input()
-        input("Press enter to continue.")
+        input(UserInterface.format_text("Press enter to continue.", text_type=TEXT_TYPE.get("BOLD")))
     else:
         # Start the application with a public menu interface
         user.show_menu()
         node = user.handle_menu_user_input()
 
-    ui.clear_console()
+    UserInterface.clear_console()
     return run_goodchain_app(node)
 
 
