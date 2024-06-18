@@ -98,8 +98,16 @@ class User:
                 entered_password_hash = self.get_password_hash_value(password)
                 expected_password_hash = node_entity[1]
                 if entered_password_hash == expected_password_hash:
-                    # Login attempt successful, now return the corresponding node object
-                    return self.__convert_node_entity_to_instance(node_entity)
+                    # Login attempt successful
+                    node_account_is_available = self.database.is_node_logged_in(username) == 0
+                    if node_account_is_available:
+                        # Return the corresponding node object
+                        return self.__convert_node_entity_to_instance(node_entity)
+                    else:
+                        error_text = "Failed to login, there is someone logged in on this account already."
+                        print(self.ui.format_text(error_text, TEXT_COLOR.get("RED")))
+                        input("\n" + self.ui.PRESS_ENTER_TO_CONTINUE)
+                        return
 
             # Login attempt unsuccessful
             remaining_attempts = (max_amount_of_attempts - attempts) - 1

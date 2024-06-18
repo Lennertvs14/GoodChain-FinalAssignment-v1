@@ -223,6 +223,7 @@ class Node:
                     print(self.wallet.transactions)
                 case 10:
                     self.transaction_server.stop_server()
+                    self.database.log_out_node(self.username)
                     print("\nThanks for using GoodChain!")
                     return None
                 case _:

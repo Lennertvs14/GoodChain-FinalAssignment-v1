@@ -31,7 +31,8 @@ class Database:
                 PasswordHash text,
                 PublicKey text,
                 PrivateKey text,
-                LastLogin DATETIME
+                LastLogin DATETIME,
+                IsLoggedIn BOOLEAN DEFAULT 0
             )"""
         )
         # Ensure LedgerServer table exists
@@ -108,7 +109,8 @@ class Database:
         """ Returns the last time a node logged in """
         node = self.get_node_by_username(username)
         if node:
-            return node[-1]
+            # LastLogin extraction from node dict
+            return node[-2]
         else:
             return None
 
@@ -117,6 +119,28 @@ class Database:
         """ Updates the last login date for a node """
         self.cursor.execute(
             """ UPDATE Node 
-                SET LastLogin = CURRENT_TIMESTAMP
+                SET LastLogin = CURRENT_TIMESTAMP,
+                    IsLoggedIn = 1
                 WHERE Username = :username
                 """, {'username': username})
+
+    @handle_connection
+    def log_out_node(self, username: str):
+        """ Updates the IsLoggedIn boolean for a node """
+        self.cursor.execute(
+            """ UPDATE Node
+            SET IsLoggedIn = 0
+            WHERE Username = :username
+            """, {'username': username}
+        )
+
+    @handle_connection
+    def is_node_logged_in(self, username: str):
+        """ Returns whether the node is logged in or not """
+        self.cursor.execute(
+            """ SELECT IsLoggedIn
+            FROM Node
+            WHERE Username = :username
+            """, {'username': username}
+        )
+        return (self.cursor.fetchone())[0]
