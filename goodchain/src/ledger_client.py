@@ -1,4 +1,3 @@
-from database import Database
 from server import HEADER_SIZE, DATA_FORMAT
 import pickle
 from transaction_block import TransactionBlock
@@ -6,17 +5,11 @@ import socket
 
 
 class LedgerClient:
-    database = Database()
-
-    def __init__(self, corresponding_server_port):
+    def __init__(self, corresponding_server):
         self.host = socket.gethostbyname(socket.gethostname())
-        self.corresponding_server_port = corresponding_server_port
+        self.corresponding_server = corresponding_server
 
     def broadcast_change(self, crud_operation, block: TransactionBlock):
-        for server in self.database.get_ledger_servers():
-            server_port = server[0]
-            # We do not need to broadcast to ourselves
-            if str(server_port) != str(self.corresponding_server_port):
                 try:
                     # Create a new socket for each connection
                     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -39,3 +32,4 @@ class LedgerClient:
                     pass
                 finally:
                     s.close()
+        for server_port in self.corresponding_server.get_servers(include_own_server=False):

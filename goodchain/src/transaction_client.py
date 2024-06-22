@@ -1,22 +1,15 @@
-from database import Database
-from server import HEADER_SIZE, DATA_FORMAT
 import pickle
+from server import HEADER_SIZE, DATA_FORMAT
 from transaction import Transaction
 import socket
 
 
 class TransactionClient:
-    database = Database()
-
-    def __init__(self, corresponding_server_port):
+    def __init__(self, corresponding_server):
         self.host = socket.gethostbyname(socket.gethostname())
-        self.corresponding_server_port = corresponding_server_port
+        self.corresponding_server = corresponding_server
 
     def broadcast_change(self, crud_operation, transactions: list[Transaction]):
-        for server in self.database.get_transaction_servers():
-            server_port = server[0]
-            # We do not need to broadcast to ourselves
-            if str(server_port) != str(self.corresponding_server_port):
                 try:
                     # Create a new socket for each connection
                     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

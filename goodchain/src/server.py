@@ -18,6 +18,8 @@ CRUD = {
 
 class Server(ABC):
     """ Base class for servers in client/server model context """
+    server_data_file_path = None
+
     def __init__(self, port):
         self.port = port
         self.host = socket.gethostbyname(socket.gethostname())
@@ -61,6 +63,31 @@ class Server(ABC):
             if time() - start_time > 60:
                 raise Exception("Timeout: Could not find an available port.")
             sleep(0.1)
+
+    def insert_server(self):
+        """ Adds server's port to the file """
+        if self.server_data_file_path:
+            current_servers = self.get_servers()
+            if not current_servers.__contains__(self.port):
+                with open(self.server_data_file_path, "ab") as ledger:
+                    pickle.dump(self.port, ledger)
+
+    def get_servers(self, include_own_server=True):
+        """ Returns a list of servers from the file """
+        servers = []
+        try:
+            with open(self.server_data_file_path, "rb") as server_data:
+                while True:
+                    server_port = pickle.load(server_data)
+                    if include_own_server or server_port is not self.port:
+                        servers.append(server_port)
+        except FileNotFoundError:
+            # There are no servers yet.
+            pass
+        except EOFError:
+            # No more lines to read from file.
+            pass
+        return servers
 
     def listen(self):
         # Find an available port

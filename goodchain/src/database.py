@@ -2,14 +2,14 @@ import os
 import sqlite3
 
 
-PATH = r"../../../../Users/lenne/desktop/database.db"
+PATH = "../data/database.db"
 
 
 class Database:
     """ Perform queries on the node database """
     def __init__(self):
         os.makedirs(os.path.dirname(PATH), exist_ok=True)
-        self.connection = sqlite3.connect(PATH, isolation_level='IMMEDIATE')
+        self.connection = sqlite3.connect(PATH, check_same_thread=False, isolation_level='IMMEDIATE')
         self.cursor = self.connection.cursor()
         self.initialize_database()
 
@@ -34,48 +34,6 @@ class Database:
                 LastLogin DATETIME,
                 IsLoggedIn BOOLEAN DEFAULT 0
             )"""
-        )
-        # Ensure LedgerServer table exists
-        self.cursor.execute(
-            """ CREATE TABLE IF NOT EXISTS LedgerServer (
-                Port text
-            )"""
-        )
-        # Ensure TransactionPoolServer table exists
-        self.cursor.execute(
-            """ CREATE TABLE IF NOT EXISTS TransactionServer (
-                Port text
-            )"""
-        )
-
-    @handle_connection
-    def get_ledger_servers(self):
-        """ Returns a list of ledger servers """
-        self.cursor.execute("SELECT DISTINCT * FROM LedgerServer")
-        return self.cursor.fetchall()
-
-    @handle_connection
-    def insert_ledger_server(self, port):
-        """ Inserts a ledger server into the database if it does not exist already """
-        self.cursor.execute(
-            """ INSERT OR IGNORE INTO LedgerServer (Port)
-                VALUES (?)
-                """, (port,)
-        )
-
-    @handle_connection
-    def get_transaction_servers(self):
-        """ Returns a list of transaction servers """
-        self.cursor.execute("SELECT DISTINCT * FROM TransactionServer")
-        return self.cursor.fetchall()
-
-    @handle_connection
-    def insert_transaction_server(self, port):
-        """ Inserts a transaction server into the database if it does not exist already """
-        self.cursor.execute(
-            """ INSERT OR IGNORE INTO TransactionServer (Port)
-                VALUES (?)
-                """, (port,)
         )
 
     @handle_connection

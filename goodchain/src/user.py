@@ -2,6 +2,7 @@ from database import Database
 from ledger import Ledger
 from ledger_server import LedgerServer
 from node import Node
+from node_server import NodeServer
 import re
 from system import System
 from transaction_server import TransactionServer
@@ -33,14 +34,20 @@ class User:
 
     def __init__(self):
         self.database = Database()
+        self.node_server = NodeServer()
+        self.node_server.insert_server()
+        self.node_server.start_server()
+        print(f"Node server listening on {self.node_server.port}")
 
         self.ledger_server = LedgerServer()
+        self.ledger_server.insert_server()
         self.ledger_server.start_server()
-        self.database.insert_ledger_server(self.ledger_server.port)
+        print(f"Ledger server listening on {self.ledger_server.port}")
 
         self.transaction_server = TransactionServer()
+        self.transaction_server.insert_server()
         self.transaction_server.start_server()
-        self.database.insert_transaction_server(self.transaction_server.port)
+        print(f"Transaction server listening on {self.transaction_server.port}")
 
     def handle_menu_user_input(self):
         """ Handles user input for the public menu interface """
@@ -80,6 +87,7 @@ class User:
             self.database.insert_node(node)
             sign_up_reward = 50.0
             reward_transaction = System.grant_reward(node, sign_up_reward)
+            node.node_client.broadcast_change(CRUD.get("ADD"), node)
             node.transaction_client.broadcast_change(CRUD.get("ADD"), [reward_transaction])
 
     def login(self):
@@ -121,8 +129,7 @@ class User:
     def __convert_node_entity_to_instance(self, node_entity):
         """ Create a Node instance from a node entity """
         return (
-            Node(node_entity[0], node_entity[1], self.ledger_server, self.transaction_server,
-                 node_entity[2], node_entity[3], True)
+            Node(self, node_entity[0], node_entity[1], (node_entity[2], node_entity[3]), True)
         )
 
     def __create_node(self):
@@ -152,7 +159,7 @@ class User:
         password_hash = self.get_password_hash_value(password)
 
         # Create and return node
-        return Node(username, password_hash, self.ledger_server, self.transaction_server)
+        return Node(self, username, password_hash)
 
     def __validate_username(self, username):
         # Empty check

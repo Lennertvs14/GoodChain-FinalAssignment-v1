@@ -3,8 +3,9 @@ from server import Server, CRUD
 
 
 class TransactionServer(Server):
-    def __init__(self, port=6060):
+    def __init__(self, port=7070):
         super().__init__(port)
+        self.server_data_file_path = "../data/transaction_servers.dat"
 
     def handle_client(self, connection):
         data = self.get_client_data(connection)
