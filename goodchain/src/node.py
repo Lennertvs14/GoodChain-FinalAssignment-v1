@@ -6,12 +6,13 @@ from datetime import datetime, timedelta
 from ledger import Ledger
 from ledger_client import LedgerClient
 from ledger_server import CRUD
+from node_client import NodeClient
 from system import System
 from transaction import Transaction, REWARD
 from transaction_block import TransactionBlock
 from transaction_client import TransactionClient
 from transaction_pool import TransactionPool
-from user_interface import UserInterface, WHITESPACE, TEXT_COLOR, TEXT_TYPE
+from user_interface import UserInterface, WHITESPACE, TEXT_COLOR
 from wallet import Wallet
 
 
@@ -24,21 +25,22 @@ class Node:
     ui = UserInterface()
     database = Database()
 
-    def __init__(self, username, password_hash, ledger_server, transaction_server,
-                 public_key=None, private_key=None, show_notifications=False):
+    def __init__(self, user, username, password_hash, keys: (str, str) = None, show_notifications=False):
         self.username = username
         self.password_hash = password_hash
-        if public_key and private_key:
-            self.public_key = public_key
-            self.private_key = private_key
+        if keys:
+            self.public_key, private_key = keys
         else:
             self.private_key, self.public_key = self.__generate_serialized_keys()
         self.wallet = Wallet(self)
 
-        self.ledger_server = ledger_server
-        self.ledger_client = LedgerClient(self.ledger_server.port)
-        self.transaction_server = transaction_server
-        self.transaction_client = TransactionClient(self.transaction_server.port)
+        # Map from user
+        self.node_server = user.node_server
+        self.node_client = NodeClient(self.node_server)
+        self.ledger_server = user.ledger_server
+        self.ledger_client = LedgerClient(self.ledger_server)
+        self.transaction_server = user.transaction_server
+        self.transaction_client = TransactionClient(self.transaction_server)
 
         self.check_last_block()
         if show_notifications:
@@ -130,6 +132,7 @@ class Node:
 
         # Update last login date
         self.database.update_last_login_date(self.username)
+        self.node_client.broadcast_change(CRUD.get("UPDATE"), self)
 
         for block in new_blocks:
             if block.miner.username == self.username:
@@ -224,6 +227,7 @@ class Node:
                 case 10:
                     self.transaction_server.stop_server()
                     self.database.log_out_node(self.username)
+                    self.node_client.broadcast_change(CRUD.get("UPDATE"), self)
                     print("\nThanks for using GoodChain!")
                     return None
                 case _:
@@ -425,7 +429,7 @@ class Node:
                 print(self.ui.INVALID_ID)
 
         TransactionPool.remove_transactions([transaction_to_cancel])
-        self.transaction_client.broadcast_change("DELETE", [transaction_to_cancel])
+        self.transaction_client.broadcast_change(CRUD.get("DELETE"), [transaction_to_cancel])
         print(self.ui.format_text("Your transaction is successfully canceled.", TEXT_COLOR.get("GREEN")))
 
     def __validate_mining_conditions(self, transaction_pool, is_genesis_block):
