@@ -28,6 +28,8 @@ class Node:
     def __init__(self, user, username, password_hash, keys: (str, str) = None, show_notifications=False):
         self.username = username
         self.password_hash = password_hash
+        self.is_logged_in = False
+
         if keys:
             self.public_key, private_key = keys
         else:
@@ -131,7 +133,8 @@ class Node:
                 print(WHITESPACE + f"#{block.id}")
 
         # Update last login date
-        self.database.update_last_login_date(self.username)
+        self.is_logged_in = True
+        self.database.update_last_login(self.username, self.is_logged_in)
         self.node_client.broadcast_change(CRUD.get("UPDATE"), self)
 
         for block in new_blocks:
@@ -225,7 +228,7 @@ class Node:
                     print(self.ui.format_text("Transaction history", TEXT_COLOR.get("YELLOW")) + "\n")
                     print(self.wallet.transactions)
                 case 10:
-                    self.transaction_server.stop_server()
+                    self.is_logged_in = False
                     self.database.log_out_node(self.username)
                     self.node_client.broadcast_change(CRUD.get("UPDATE"), self)
                     print("\nThanks for using GoodChain!")

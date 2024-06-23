@@ -73,14 +73,14 @@ class Database:
             return None
 
     @handle_connection
-    def update_last_login_date(self, username: str):
+    def update_last_login(self, username: str, is_node_logged_in: bool):
         """ Updates the last login date for a node """
         self.cursor.execute(
             """ UPDATE Node 
                 SET LastLogin = CURRENT_TIMESTAMP,
-                    IsLoggedIn = 1
+                    IsLoggedIn = :isLoggedIn
                 WHERE Username = :username
-                """, {'username': username})
+                """, {'username': username, 'isLoggedIn': int(is_node_logged_in)})
 
     @handle_connection
     def log_out_node(self, username: str):

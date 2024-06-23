@@ -103,8 +103,8 @@ class User:
                 expected_password_hash = node_entity[1]
                 if entered_password_hash == expected_password_hash:
                     # Login attempt successful
-                    node_account_is_available = self.database.is_node_logged_in(username) == 0
-                    if node_account_is_available:
+                    node_is_logged_in = int(self.database.is_node_logged_in(username))
+                    if node_is_logged_in == 0:
                         # Return the corresponding node object
                         return self.__convert_node_entity_to_instance(node_entity)
                     else:

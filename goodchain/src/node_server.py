@@ -19,7 +19,7 @@ class NodeServer(Server):
         elif crud_operation == CRUD.get("UPDATE"):
             updated_node = data[1]
             if updated_node:
-                self.database.update_last_login_date(updated_node.username)
+                self.database.update_last_login(updated_node.username, updated_node.is_logged_in)
         elif crud_operation == CRUD.get("REGISTER"):
             new_server = data[1]
             self.add_server(new_server)
