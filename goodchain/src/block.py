@@ -69,8 +69,6 @@ class Block:
             result += f"{t}"
             result += "\n"
 
-        result = UserInterface.format_text(result, TEXT_COLOR.get("CYAN"))
-
         result += WHITESPACE + f"Mined by: {self.miner.username}\n"
         result += WHITESPACE + f"Total transaction fee: {str(self.total_transaction_fee)}\n"
         result += WHITESPACE + fr"Nonce: {str(self.nonce)}" + "\n"
