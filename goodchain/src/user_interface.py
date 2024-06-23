@@ -30,6 +30,7 @@ class UserInterface:
         self.INVALID_ID = self.format_text("Invalid id, please try again.", TEXT_COLOR.get("RED"))
 
         self.BACK = self.format_text('back', text_type=TEXT_TYPE.get("BOLD"))
+        self.ERROR = self.format_text("An unexpected error occurred.", text_color=TEXT_COLOR.get("RED"))
 
     @staticmethod
     def clear_console():
