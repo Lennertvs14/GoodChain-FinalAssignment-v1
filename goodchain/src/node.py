@@ -228,10 +228,7 @@ class Node:
                     print(self.ui.format_text("Transaction history", TEXT_COLOR.get("YELLOW")) + "\n")
                     print(self.wallet.transactions)
                 case 10:
-                    self.is_logged_in = False
-                    self.database.log_out_node(self.username)
-                    self.node_client.broadcast_change(CRUD.get("UPDATE"), self)
-                    print("\nThanks for using GoodChain!")
+                    self.log_out()
                     return None
                 case _:
                     print(self.ui.INVALID_MENU_ITEM)
@@ -267,7 +264,7 @@ class Node:
         chosen_transactions = self.__get_transactions_to_mine(maximum_transactions)
 
         # Get confirmation
-        input(self.ui.PRESS_ENTER_TO_CONTINUE)
+        input("\n" + self.ui.PRESS_ENTER_TO_CONTINUE)
 
         valid_transactions = []
         invalid_transactions = []
@@ -393,6 +390,12 @@ class Node:
             print(self.ui.format_text("Your transfer is successfully initialised!", TEXT_COLOR.get("GREEN")))
         else:
             print(self.ui.format_text("Your transaction is invalid, please try again.", TEXT_COLOR.get("RED")))
+
+    def log_out(self):
+        self.is_logged_in = False
+        self.database.log_out_node(self.username)
+        self.node_client.broadcast_change(CRUD.get("UPDATE"), self)
+        print("\nThanks for using GoodChain!")
 
     def cancel_pending_transaction(self):
         """ Cancels a pending transaction if possible """

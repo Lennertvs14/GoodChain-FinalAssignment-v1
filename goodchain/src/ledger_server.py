@@ -3,7 +3,9 @@ from server import Server, CRUD
 
 
 class LedgerServer(Server):
-    def __init__(self, port=6060):
+    default_port = 6060
+
+    def __init__(self, port=default_port):
         super().__init__(port)
         self.server_data_file_path = "../data/ledger_servers.dat"
 

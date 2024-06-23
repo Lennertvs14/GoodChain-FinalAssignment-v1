@@ -4,8 +4,9 @@ from server import Server, CRUD
 
 class NodeServer(Server):
     database = Database()
+    default_port = 5050
 
-    def __init__(self, port=5050):
+    def __init__(self, port=default_port):
         super().__init__(port)
         self.server_data_file_path = "../data/database_servers.dat"
 

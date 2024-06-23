@@ -3,7 +3,9 @@ from server import Server, CRUD
 
 
 class TransactionServer(Server):
-    def __init__(self, port=7070):
+    default_port = 7070
+
+    def __init__(self, port=default_port):
         super().__init__(port)
         self.server_data_file_path = "../data/transaction_servers.dat"
 

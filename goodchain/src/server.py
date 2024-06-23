@@ -18,6 +18,7 @@ CRUD = {
 
 class Server(ABC):
     """ Base class for servers in client/server model context """
+    default_port = None
     server_data_file_path = None
 
     def __init__(self, port):
@@ -103,7 +104,16 @@ class Server(ABC):
 
     def announce_presence(self):
         """ Whispers the server's port to network """
-        for server_port in self.get_servers(include_own_server=False):
+        known_servers = self.get_servers(include_own_server=False)
+        if len(known_servers) < 1 and self.default_port:
+            # Count down to default port to discover unknown running servers.
+            temp = self.port
+            while temp > self.default_port:
+                temp -= 1
+                known_servers.append(temp)
+                self.add_server(temp)
+
+        for server_port in known_servers:
             try:
                 # Create a new socket for each connection
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
