@@ -5,14 +5,14 @@ import socket
 from threading import Thread
 from time import sleep, time
 
-
 HEADER_SIZE = 64
 DATA_FORMAT = 'utf-8'
 DEFAULT_BUFFER_SIZE = 1024
 CRUD = {
     "ADD": "ADD",
     "UPDATE": "UPDATE",
-    "DELETE": "DELETE"
+    "DELETE": "DELETE",
+    "REGISTER": "REGISTER"
 }
 
 
@@ -64,30 +64,9 @@ class Server(ABC):
                 raise Exception("Timeout: Could not find an available port.")
             sleep(0.1)
 
-    def insert_server(self):
-        """ Adds server's port to the file """
-        if self.server_data_file_path:
-            current_servers = self.get_servers()
-            if not current_servers.__contains__(self.port):
-                with open(self.server_data_file_path, "ab") as ledger:
-                    pickle.dump(self.port, ledger)
-
-    def get_servers(self, include_own_server=True):
-        """ Returns a list of servers from the file """
-        servers = []
-        try:
-            with open(self.server_data_file_path, "rb") as server_data:
-                while True:
-                    server_port = pickle.load(server_data)
-                    if include_own_server or server_port is not self.port:
-                        servers.append(server_port)
-        except FileNotFoundError:
-            # There are no servers yet.
-            pass
-        except EOFError:
-            # No more lines to read from file.
-            pass
-        return servers
+        # Whisper to network
+        self.add_server()
+        self.announce_presence()
 
     def listen(self):
         # Find an available port
@@ -110,6 +89,58 @@ class Server(ABC):
             except socket.error:
                 # Binding failed, so current port is unavailable
                 self.port += 1
+
+    def add_server(self, new_server_port=None):
+        """ Adds server's port to the file """
+        if new_server_port:
+            server = new_server_port
+        else:
+            server = self.port
+        server_is_new = not (self.get_servers(include_own_server=True).__contains__(server))
+        if self.server_data_file_path and server_is_new:
+            with open(self.server_data_file_path, "ab") as f:
+                pickle.dump(server, f)
+
+    def announce_presence(self):
+        """ Whispers the server's port to network """
+        for server_port in self.get_servers(include_own_server=False):
+            try:
+                # Create a new socket for each connection
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    # Connect to peer address
+                    s.connect((self.host, int(server_port)))
+                    # Prepare data
+                    block_data = pickle.dumps((CRUD.get("REGISTER"), self.port))
+                    data_length = len(block_data)
+                    # Create header
+                    header = str(data_length).encode(DATA_FORMAT)
+                    header += b' ' * (HEADER_SIZE - len(header))
+                    # Send header
+                    s.send(header)
+                    # Send the actual data
+                    s.send(block_data)
+            except OSError as os_error:
+                # Connection to this server cannot be established.
+                pass
+            finally:
+                s.close()
+
+    def get_servers(self, include_own_server=True):
+        """ Returns a list of servers from the file """
+        servers = []
+        try:
+            with open(self.server_data_file_path, "rb") as server_data:
+                while True:
+                    server_port = pickle.load(server_data)
+                    if include_own_server or int(server_port) != int(self.port):
+                        servers.append(server_port)
+        except FileNotFoundError:
+            # There are no servers yet.
+            pass
+        except EOFError:
+            # No more lines to read from file.
+            pass
+        return servers
 
     def stop_server(self):
         # Stop the running server

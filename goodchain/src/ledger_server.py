@@ -23,3 +23,7 @@ class LedgerServer(Server):
             # Remove block on ledger
             obsolete_block = data[1]
             Ledger.remove_block(obsolete_block)
+        elif crud_operation == CRUD.get("REGISTER"):
+            # Add new server to network
+            new_server = data[1]
+            self.add_server(new_server)

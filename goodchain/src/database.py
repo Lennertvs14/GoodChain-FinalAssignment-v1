@@ -9,7 +9,7 @@ class Database:
     """ Perform queries on the node database """
     def __init__(self):
         os.makedirs(os.path.dirname(PATH), exist_ok=True)
-        self.connection = sqlite3.connect(PATH, check_same_thread=False, isolation_level='IMMEDIATE')
+        self.connection = sqlite3.connect(PATH, check_same_thread=False)
         self.cursor = self.connection.cursor()
         self.initialize_database()
 

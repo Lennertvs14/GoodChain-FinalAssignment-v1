@@ -34,20 +34,14 @@ class User:
 
     def __init__(self):
         self.database = Database()
+
         self.node_server = NodeServer()
-        self.node_server.insert_server()
-        self.node_server.start_server()
-        print(f"Node server listening on {self.node_server.port}")
-
         self.ledger_server = LedgerServer()
-        self.ledger_server.insert_server()
-        self.ledger_server.start_server()
-        print(f"Ledger server listening on {self.ledger_server.port}")
-
         self.transaction_server = TransactionServer()
-        self.transaction_server.insert_server()
+
+        self.node_server.start_server()
+        self.ledger_server.start_server()
         self.transaction_server.start_server()
-        print(f"Transaction server listening on {self.transaction_server.port}")
 
     def handle_menu_user_input(self):
         """ Handles user input for the public menu interface """
@@ -69,7 +63,9 @@ class User:
                     print(self.ui.format_text("Sign up", TEXT_COLOR.get("YELLOW")) + "\n")
                     self.registrate()
                 case 4:
+                    self.node_server.stop_server()
                     self.ledger_server.stop_server()
+                    self.transaction_server.stop_server()
                     System().exit()
                 case _:
                     print(self.ui.INVALID_MENU_ITEM)

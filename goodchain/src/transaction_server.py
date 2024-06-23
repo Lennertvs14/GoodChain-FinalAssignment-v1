@@ -20,3 +20,6 @@ class TransactionServer(Server):
         elif crud_operation == CRUD.get("DELETE"):
             obsolete_transactions = data[1]
             TransactionPool.remove_transactions(obsolete_transactions)
+        elif crud_operation == CRUD.get("REGISTER"):
+            new_server = data[1]
+            self.add_server(new_server)
