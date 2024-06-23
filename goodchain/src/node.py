@@ -25,13 +25,14 @@ class Node:
     ui = UserInterface()
     database = Database()
 
-    def __init__(self, user, username, password_hash, keys: (str, str) = None, show_notifications=False):
+    def __init__(self, user, username, password_hash, keys: (bytes, bytes) = None, show_notifications=False):
         self.username = username
         self.password_hash = password_hash
         self.is_logged_in = False
 
         if keys:
-            self.public_key, private_key = keys
+            self.public_key = keys[0]
+            self.private_key = keys[1]
         else:
             self.private_key, self.public_key = self.__generate_serialized_keys()
         self.wallet = Wallet(self)
